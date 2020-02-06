@@ -8,10 +8,7 @@ from api import ping_response, start_response, move_response, end_response
 
 @bottle.route('/')
 def index():
-    return '''
-    Battlesnake documentation can be found at
-       <a href="https://docs.battlesnake.com">https://docs.battlesnake.com</a>.
-    '''
+    return "<h1>Serprintine</h1>"
 
 
 @bottle.route('/static/<path:path>')
@@ -45,9 +42,12 @@ def start():
     """
     print(json.dumps(data))
 
-    color = "#00FF00"
-
-    return start_response(color)
+    return {
+        "color": "#00e5e5",
+        "head": "tongue",
+        "tail": "curled",
+        'taunt': "Printin' lines & feelin' fine",
+    }
 
 
 @bottle.post('/move')
@@ -58,6 +58,7 @@ def move():
     TODO: Using the data from the endpoint request object, your
             snake AI must choose a direction to move in.
     """
+    print("TEST\n")
     print(json.dumps(data))
 
     directions = ['up', 'down', 'left', 'right']
