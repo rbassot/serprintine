@@ -1,3 +1,8 @@
+Serprintine is a project based off the Python starter-snake found at https://play.battlesnake.com/. Documentation below is from the  official Battlesnake website.
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
 # starter-snake-python
 
 A simple [Battlesnake AI](http://battlesnake.io) written in Python. 
