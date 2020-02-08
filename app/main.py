@@ -43,7 +43,7 @@ def start():
     #print(json.dumps(data))
 
     return {
-        "color": "#008080",
+        "color": "#00b3b3",
         "headType": "tongue",
         "tailType": "curled",
         'taunt': "Printin' lines & feelin' fine",
