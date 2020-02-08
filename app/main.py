@@ -40,12 +40,12 @@ def start():
             initialize your snake state here using the
             request's data if necessary.
     """
-    print(json.dumps(data))
+    #print(json.dumps(data))
 
     return {
         "color": "#00e5e5",
-        "head": "tongue",
-        "tail": "curled",
+        "headType": "tongue",
+        "tailType": "curled",
         'taunt': "Printin' lines & feelin' fine",
     }
 
