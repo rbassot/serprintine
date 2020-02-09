@@ -126,6 +126,7 @@ def move():
         - To calculate the amount of move influences my snake has based on the situation of the game.
         - Total the influence counts after every check and select a direction to move in.
     '''
+    move_up = move_down = move_left = move_right = 0
 
     #get my head coordinates
     head_x, head_y = my_snake.head
