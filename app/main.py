@@ -13,56 +13,6 @@ from api import ping_response, start_response, move_response, end_response
 LOW_HEALTH = 30
 
 
-#----------GAME FUNCTIONS-----------
-
-'''
-initialize(): Function to convert the JSON request data into usable objects.
-'''
-def initialize(request):
-
-    #Parse JSON into a dictionary
-    data = json.loads(request)
-
-    #board maintenance
-    width = data['board']['width'] 
-    height = data['board']['height'] 
-    food = []
-
-    for meal in data['board']['food']:
-        x = meal['x']
-        y = meal['y']
-        food.extend((x, y))
-
-    board = classes.Board(width, height, food)
-
-    #my snake maintenance
-    health = data['you']['health']
-    body = []
-    for part in data['you']['body']:
-        x = part['x']
-        y = part['y']
-        body.extend((x, y))
-
-    my_snake = classes.Snake(body, health)
-
-    #enemy snake maintenance
-    enemy_snakes = []
-    for snake in data['board']['snakes']:
-
-        enemy_health = snake['health']
-        enemy_body = []
-
-        for part in snake['body']:
-            x = part['x']
-            y = part['y']
-            enemy_body.extend((x, y))
-
-        enemy_snake = Snake(enemy_body, enemy_health)
-        enemy_snakes.extend(enemy_snake)
-
-    return my_snake, enemy_snakes, board
-
-
 
 @bottle.route('/')
 def index():
@@ -177,9 +127,6 @@ def move():
         - Total the influence counts after every check and select a direction to move in.
     '''
 
-    #calculate move influences
-    move_influences = {"up": 0, "down": 0,}
-
     #get my head coordinates
     head_x, head_y = my_snake.head
 
@@ -226,8 +173,13 @@ def move():
         pass
     
     #secondary influences
-    move_influences = [
-        move_up if 'up' in possible_moves,
+    move_influences = []
+    if 'up' in possible_moves:
+        move_influences.append(move_up)
+    print(move_influences)
+    if 'down' in possible_moves:
+        move_influences.append(move_down)
+
         move_down if 'down' in possible_moves,
         move_left if 'left' in possible_moves,
         move_right if 'right' in possible_moves
@@ -253,6 +205,57 @@ def end():
     print(json.dumps(data))
 
     return end_response()
+
+
+
+#----------GAME FUNCTIONS-----------
+
+'''
+initialize(): Function to convert the JSON request data into usable objects.
+'''
+def initialize(request):
+
+    #Parse JSON into a dictionary
+    data = json.loads(request)
+
+    #board maintenance
+    width = data['board']['width'] 
+    height = data['board']['height'] 
+    food = []
+
+    for meal in data['board']['food']:
+        x = meal['x']
+        y = meal['y']
+        food.append((x, y))
+
+    board = classes.Board(width, height, food)
+
+    #my snake maintenance
+    health = data['you']['health']
+    body = []
+    for part in data['you']['body']:
+        x = part['x']
+        y = part['y']
+        body.append((x, y))
+
+    my_snake = classes.Snake(body, health)
+
+    #enemy snake maintenance
+    enemy_snakes = []
+    for snake in data['board']['snakes']:
+
+        enemy_health = snake['health']
+        enemy_body = []
+
+        for part in snake['body']:
+            x = part['x']
+            y = part['y']
+            enemy_body.append((x, y))
+
+        enemy_snake = Snake(enemy_body, enemy_health)
+        enemy_snakes.extend(enemy_snake)
+
+    return my_snake, enemy_snakes, board
 
 
 # Expose WSGI app (so gunicorn can find it)
