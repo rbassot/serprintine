@@ -39,10 +39,44 @@ class Snake(Object):
     METHODS:
         __init__(self, body, health):
             Creates an instance of an existing snake in the arena.
+
+        get_head(self):
+            Returns the head of the snake even if it doesn't have a head attribute.
+
+        get_length(self):
+            Returns the total length of the snake.
+
+        get_body_location(self):
+            Returns the direction, from the head, where the snake's next body part exists, and
+            therefore the direction the snake certainly shouldn't go next. This also decribes the
+            direction that the snake selected on the previous turn.
         
     '''
-    def __init__(self, body, health):
+    def __init__(self, body, head=None, health):
+        if head != None:
+            self.head = head
         self.body = body
         self.health = health
+
+    def get_head(self):
+        return self.body[0]
+
+    def get_length(self):
+        return len(self.body)
+
+    def get_body_location(self):
+        x, y = self.body[0]
+        body_x, body_y = self.body[1]
+
+        if x == body_x and y < body_y:
+            return "up"
+        
+        elif x == body_x and y > body_y:
+            return "down"
+
+        elif y == body_y and x > body_x:
+            return "left"
+
+        else return "right"
 
 

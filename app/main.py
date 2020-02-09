@@ -45,22 +45,22 @@ def initialize(request):
 
     my_snake = classes.Snake(body, health)
 
-    #opponent snake maintenance
-    opp_snakes = []
-    for snake in snakes:
+    #enemy snake maintenance
+    enemy_snakes = []
+    for snake in data['board']['snakes']:
 
-        opp_health = snake['health']
-        body = []
+        enemy_health = snake['health']
+        enemy_body = []
 
         for part in snake['body']:
             x = part['x']
             y = part['y']
-            body.extend((x, y))
+            enemy_body.extend((x, y))
 
-        opp_snake = Snake(body, health)
-        opp_snakes.extend(opp_snake)
+        enemy_snake = Snake(enemy_body, enemy_health)
+        enemy_snakes.extend(enemy_snake)
 
-    return my_snake, opp_snakes, board
+    return my_snake, enemy_snakes, board
 
 
 
@@ -167,17 +167,77 @@ def move():
     data = bottle.request.json
 
     #Parse JSON object
-    my_snake, snakes, game = initialize(data)
+    my_snake, enemy_snakes, board = initialize(data)
 
-    """
-    TODO: Using the data from the endpoint request object, your
-            snake AI must choose a direction to move in.
-    """
-    print("TEST\n")
-    print(json.dumps(data))
 
-    directions = ['up', 'down', 'left', 'right']
-    move = 'up'
+    #----------CALCULATING BEST MOVE----------
+    '''
+    STRATEGY:
+        - To calculate the amount of move influences my snake has based on the situation of the game.
+        - Total the influence counts after every check and select a direction to move in.
+    '''
+
+    #calculate move influences
+    move_influences = {"up": 0, "down": 0,}
+
+    #get my head coordinates
+    head_x, head_y = my_snake.head
+
+    #check snake's head location on board - 1st priority influence
+    if head_x == 1 or head_x == board.width:
+        move_up += 1
+        move_down += 1
+        horiz_board_edge = True
+
+    if head_y == 1 or head_y == board.height:
+        move_left += 1
+        move_right += 1
+        vert_board_edge = True
+
+    #check snake's previous move/next body part - 2nd priority influence
+    prev_direction = my_snake.get_body_location()
+
+    
+
+
+
+
+    #print("TEST\n")
+    #print(json.dumps(data))
+
+    #----------MOVE DECISION-MAKING----------
+    #priority influence 1
+    if horiz_board_edge and not vert_board_edge:
+        possible_moves = ['up', 'down']
+    
+    elif vert_board edge and not horiz_board_edge:
+        possible_moves = ['left', 'right']
+
+    #Case where snake is in a corner of the board???
+    #elif horiz_board_edge and vert_board_edge:        
+
+    else:
+        possible_moves = ['up', 'down', 'left', 'right']
+
+    #priority influence 2
+    try:
+        possible_moves.remove(prev_direction)
+    except ValueError:
+        pass
+    
+    #secondary influences
+    move_influences = [
+        move_up if 'up' in possible_moves,
+        move_down if 'down' in possible_moves,
+        move_left if 'left' in possible_moves,
+        move_right if 'right' in possible_moves
+    ]
+
+    move_pairs = dict(zip(possible_moves, move_influences))
+    move = max(move_pairs, key=move_pairs.get)
+
+    #directions = ['up', 'down', 'left', 'right']
+    #move = 'up'
 
     return move_response(move)
 
