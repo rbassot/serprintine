@@ -41,14 +41,14 @@ def ping():
 
 @bottle.post('/start')
 def start():
-    #data = bottle.request.json
+    data = bottle.request.json
 
     """
     TODO: If you intend to have a stateful snake AI,
             initialize your snake state here using the
             request's data if necessary.
     """
-    #print(json.dumps(data))
+    print(json.dumps(data))
 
     return {
         "color": "#00b3b3",
@@ -150,8 +150,8 @@ def move():
 
 
 
-    #print("TEST\n")
-    #print(json.dumps(data))
+    print("TEST\n")
+    print(json.dumps(data))
 
     #----------MOVE DECISION-MAKING----------
     #priority influence 1
@@ -177,14 +177,12 @@ def move():
     move_influences = []
     if 'up' in possible_moves:
         move_influences.append(move_up)
-    print(move_influences)
     if 'down' in possible_moves:
         move_influences.append(move_down)
-
-        move_down if 'down' in possible_moves,
-        move_left if 'left' in possible_moves,
-        move_right if 'right' in possible_moves
-    ]
+    if 'left' in possible_moves:
+        move_influences.append(move_left)
+    if 'right' in possible_moves:
+        move_influences.append(move_right)
 
     move_pairs = dict(zip(possible_moves, move_influences))
     move = max(move_pairs, key=move_pairs.get)
