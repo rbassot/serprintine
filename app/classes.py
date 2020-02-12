@@ -1,5 +1,5 @@
 
-class Board(Object):
+class Board(object):
     '''
     CLASS DESCRIPTION:
         An object class to maintain the attributes of the Battlesnake game board.
@@ -23,7 +23,7 @@ class Board(Object):
 
 
 
-class Snake(Object):
+class Snake(object):
     '''
     CLASS DESCRIPTION:
         An object class for instances of snakes.
@@ -52,9 +52,7 @@ class Snake(Object):
             direction that the snake selected on the previous turn.
         
     '''
-    def __init__(self, body, head=None, health):
-        if head != None:
-            self.head = head
+    def __init__(self, body, health):
         self.body = body
         self.health = health
 
@@ -77,6 +75,6 @@ class Snake(Object):
         elif y == body_y and x > body_x:
             return "left"
 
-        else return "right"
+        return "right"
 
 

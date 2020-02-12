@@ -1,12 +1,16 @@
+#modified to run: Python 3.7.6
+
 import json
+import sys
 import os
 import random
 import bottle
 
 #custom game class module
+sys.path.insert(0, "C:/Users/pbass/OneDrive/code_projects/battlesnake/serprintine/app")
 import classes
 
-from api import ping_response, start_response, move_response, end_response
+from .api import ping_response, start_response, move_response, end_response
 
 
 #----------GAME CONSTANTS----------
@@ -158,7 +162,7 @@ def move():
     if horiz_board_edge and not vert_board_edge:
         possible_moves = ['up', 'down']
     
-    elif vert_board edge and not horiz_board_edge:
+    elif vert_board_edge and not horiz_board_edge:
         possible_moves = ['left', 'right']
 
     #Case where snake is in a corner of the board???
@@ -260,10 +264,13 @@ def initialize(request):
 # Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
 
-if __name__ == '__main__':
+def main():
     bottle.run(
         application,
         host=os.getenv('IP', '0.0.0.0'),
         port=os.getenv('PORT', '8080'),
         debug=os.getenv('DEBUG', True)
     )
+
+if __name__ == 'main':
+    main()
