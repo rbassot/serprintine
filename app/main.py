@@ -119,7 +119,7 @@ def start():
 def move():
     data = bottle.request.json
 
-    #Parse JSON object
+    #JSON object maintenance
     my_snake, enemy_snakes, board = initialize(json.dumps(data))
 
 
@@ -217,15 +217,12 @@ initialize(): Function to convert the JSON request data into usable objects.
 '''
 def initialize(request):
 
-    #Parse JSON into a dictionary
-    data = json.loads(request)
-
     #board maintenance
-    width = data['board']['width'] 
-    height = data['board']['height'] 
+    width = request['board']['width'] 
+    height = request['board']['height'] 
     food = []
 
-    for meal in data['board']['food']:
+    for meal in request['board']['food']:
         x = meal['x']
         y = meal['y']
         food.append((x, y))
@@ -233,9 +230,9 @@ def initialize(request):
     board = classes.Board(width, height, food)
 
     #my snake maintenance
-    health = data['you']['health']
+    health = request['you']['health']
     body = []
-    for part in data['you']['body']:
+    for part in request['you']['body']:
         x = part['x']
         y = part['y']
         body.append((x, y))
@@ -244,7 +241,7 @@ def initialize(request):
 
     #enemy snake maintenance
     enemy_snakes = []
-    for snake in data['board']['snakes']:
+    for snake in request['board']['snakes']:
 
         enemy_health = snake['health']
         enemy_body = []
