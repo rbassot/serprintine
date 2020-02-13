@@ -58,7 +58,6 @@ def start():
         "color": "#00b3b3",
         "headType": "tongue",
         "tailType": "curled",
-        'taunt': "Printin' lines faster than you",
     }
 
 
