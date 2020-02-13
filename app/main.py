@@ -271,5 +271,5 @@ def main():
         debug=os.getenv('DEBUG', True)
     )
 
-if __name__ == 'main':
+if __name__ == '__main__':
     main()
