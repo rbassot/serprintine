@@ -8,7 +8,7 @@ import bottle
 
 #custom game class module
 sys.path.insert(0, "C:/Users/pbass/OneDrive/code_projects/battlesnake/serprintine/app")
-import classes
+from .classes import *
 
 from .api import ping_response, start_response, move_response, end_response
 
