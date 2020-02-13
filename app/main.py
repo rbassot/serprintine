@@ -132,7 +132,7 @@ def move():
     move_up = move_down = move_left = move_right = 0
 
     #get my head coordinates
-    head_x, head_y = my_snake.head
+    head_x, head_y = my_snake.get_head()
 
     #check snake's head location on board - 1st priority influence
     if head_x == 1 or head_x == board.width:
