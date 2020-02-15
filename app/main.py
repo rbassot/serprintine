@@ -213,7 +213,7 @@ def end():
 #----------GAME FUNCTIONS-----------
 
 '''
-initialize(): Function to convert the JSON request data into usable objects.
+initialize(): Function to maintain the JSON request data for usability.
 '''
 def initialize(request):
 
@@ -235,7 +235,7 @@ def initialize(request):
     for part in request['you']['body']:
         x = part['x']
         y = part['y']
-        body.append((x, y))
+        body.append([x, y])
 
     my_snake = classes.Snake(body, health)
 
@@ -249,15 +249,15 @@ def initialize(request):
         for part in snake['body']:
             x = part['x']
             y = part['y']
-            enemy_body.append((x, y))
+            enemy_body.append([x, y])
 
-        enemy_snake = Snake(enemy_body, enemy_health)
-        enemy_snakes.extend(enemy_snake)
+        enemy_snake = classes.Snake(enemy_body, enemy_health)
+        enemy_snakes.append(enemy_snake)
 
     return my_snake, enemy_snakes, board
 
 
-# Expose WSGI app (so gunicorn can find it)
+#Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
 
 def main():
