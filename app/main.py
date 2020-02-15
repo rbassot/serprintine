@@ -120,7 +120,7 @@ def move():
     data = bottle.request.json
 
     #JSON object maintenance
-    my_snake, enemy_snakes, board = initialize(json.dumps(data))
+    my_snake, enemy_snakes, board = initialize(data)
 
 
     #----------CALCULATING BEST MOVE----------
