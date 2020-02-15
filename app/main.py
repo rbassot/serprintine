@@ -243,7 +243,7 @@ def move():
     #directions = ['up', 'down', 'left', 'right']
     #move = 'up'
 
-    return move_response(move)
+    return move_response('right')
 
 
 @bottle.post('/end')
