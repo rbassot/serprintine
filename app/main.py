@@ -18,6 +18,56 @@ LOW_HEALTH = 30
 
 
 
+
+#----------GAME FUNCTIONS-----------
+
+'''
+initialize(): Function to maintain the JSON request data for usability.
+'''
+def initialize(request):
+
+    #board maintenance
+    width = request['board']['width'] 
+    height = request['board']['height'] 
+    food = []
+
+    for meal in request['board']['food']:
+        x = meal['x']
+        y = meal['y']
+        food.append((x, y))
+
+    board = classes.Board(width, height, food)
+
+    #my snake maintenance
+    health = request['you']['health']
+    body = []
+    for part in request['you']['body']:
+        x = part['x']
+        y = part['y']
+        body.append([x, y])
+
+    my_snake = classes.Snake(body, health)
+
+    #enemy snake maintenance
+    enemy_snakes = []
+    for snake in request['board']['snakes']:
+
+        enemy_health = snake['health']
+        enemy_body = []
+
+        for part in snake['body']:
+            x = part['x']
+            y = part['y']
+            enemy_body.append([x, y])
+
+        enemy_snake = classes.Snake(enemy_body, enemy_health)
+        enemy_snakes.append(enemy_snake)
+
+    return my_snake, enemy_snakes, board
+
+
+
+
 @bottle.route('/')
 def index():
     return "<h1>Serprintine</h1>"
@@ -153,8 +203,8 @@ def move():
 
 
 
-    print("TEST\n")
-    print(json.dumps(data))
+    #print("TEST\n")
+    #print(json.dumps(data))
 
     #----------MOVE DECISION-MAKING----------
     #priority influence 1
@@ -208,53 +258,6 @@ def end():
 
     return end_response()
 
-
-
-#----------GAME FUNCTIONS-----------
-
-'''
-initialize(): Function to maintain the JSON request data for usability.
-'''
-def initialize(request):
-
-    #board maintenance
-    width = request['board']['width'] 
-    height = request['board']['height'] 
-    food = []
-
-    for meal in request['board']['food']:
-        x = meal['x']
-        y = meal['y']
-        food.append((x, y))
-
-    board = classes.Board(width, height, food)
-
-    #my snake maintenance
-    health = request['you']['health']
-    body = []
-    for part in request['you']['body']:
-        x = part['x']
-        y = part['y']
-        body.append([x, y])
-
-    my_snake = classes.Snake(body, health)
-
-    #enemy snake maintenance
-    enemy_snakes = []
-    for snake in request['board']['snakes']:
-
-        enemy_health = snake['health']
-        enemy_body = []
-
-        for part in snake['body']:
-            x = part['x']
-            y = part['y']
-            enemy_body.append([x, y])
-
-        enemy_snake = classes.Snake(enemy_body, enemy_health)
-        enemy_snakes.append(enemy_snake)
-
-    return my_snake, enemy_snakes, board
 
 
 #Expose WSGI app (so gunicorn can find it)
