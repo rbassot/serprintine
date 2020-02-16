@@ -15,6 +15,8 @@ from .api import ping_response, start_response, move_response, end_response
 #----------GAME CONSTANTS----------
 LOW_HEALTH = 30
 
+BOARD_EDGE_INFLUENCE = 5
+
 
 
 
@@ -179,27 +181,25 @@ def move():
     #----------CALCULATING BEST MOVE----------
     '''
     STRATEGY:
-        - To calculate the amount of move influences my snake has based on the situation of the game.
-        - Total the influence counts after every check and select a direction to move in.
+        - To calculate the number of move influences my snake has based on the situation of the game.
+        - Total the influence counts after every check and finally select a direction to move in.
     '''
-    move_up = move_down = move_left = move_right = 0
+    influence = classes.Influence()
     horiz_board_edge = False
     vert_board_edge = False
 
-    #get my head coordinates
+    #get my_snake head coordinates
     head_x, head_y = my_snake.get_head()
-    #if data["turn"] >= 3:
-        #body_x, body_y = my_snake.get_body()
 
-    #check snake's head location on board - 1st priority influence
+    #check for snake's head location at board edge - 1st priority influence
     if head_x == 0 or head_x == board.width - 1:
-        move_up += 1
-        move_down += 1
+        influence.inc_up(BOARD_EDGE_INFLUENCE)
+        influence.inc_down(BOARD_EDGE_INFLUENCE)
         horiz_board_edge = True
 
     if head_y == 0 or head_y == board.height - 1:
-        move_left += 1
-        move_right += 1
+        influence.inc_left(BOARD_EDGE_INFLUENCE)
+        influence.inc_right(BOARD_EDGE_INFLUENCE)
         vert_board_edge = True
 
     #check snake's previous move/next body part - 2nd priority influence
@@ -247,13 +247,13 @@ def move():
     #secondary influences
     move_influences = []
     if 'up' in possible_moves:
-        move_influences.append(move_up)
+        move_influences.append(influence.move_up)
     if 'down' in possible_moves:
-        move_influences.append(move_down)
+        move_influences.append(influence.move_down)
     if 'left' in possible_moves:
-        move_influences.append(move_left)
+        move_influences.append(influence.move_left)
     if 'right' in possible_moves:
-        move_influences.append(move_right)
+        move_influences.append(influence.move_right)
 
     move_pairs = dict(zip(possible_moves, move_influences))
     move = max(move_pairs, key=move_pairs.get)

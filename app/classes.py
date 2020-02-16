@@ -82,3 +82,52 @@ class Snake(object):
         return "right"
 
 
+class Influence(object):
+    '''
+    CLASS DESCRIPTION:
+        An object class to maintain the calculation of influences to determine game movement.
+
+    ----------
+    ATTRIBUTES:
+        move_up - total of influences towards moving up (-y)
+
+        move_down - total of influences towards moving down (+y)
+
+        move_left - total of influences towards moving left (-x)
+
+        move_right - total of influences towards moving right (+x)
+
+    ----------
+    METHODS:
+        __init__(self):
+            Creates an instance of an influence tracker.
+
+        inc_up(self, multiple):
+            Increments the influence towards moving up by the passed amount.
+
+        inc_down(self, multiple):
+            Increments the influence towards moving down by the passed amount.
+
+        inc_left(self, multiple):
+            Increments the influence towards moving left by the passed amount.
+
+        inc_right(self, multiple):
+            Increments the influence towards moving right by the passed amount.
+    '''
+    def __init__(self):
+        self.move_up = 0
+        self.move_down = 0
+        self.move_left = 0
+        self.move_right = 0
+
+    def inc_up(self, multiple):
+        self.move_up += 1 * multiple
+
+    def inc_down(self, multiple):
+        self.move_down += 1 * multiple
+
+    def inc_left(self, multiple):
+        self.move_left += 1 * multiple
+
+    def inc_right(self, multiple):
+        self.move_right += 1 * multiple
