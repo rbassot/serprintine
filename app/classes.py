@@ -17,8 +17,8 @@ class Board(object):
     '''
     
     def __init__(self, width, height, food):
-        self.width = int(width)
-        self.height = int(height)
+        self.width = width
+        self.height = height
         self.food = food
 
 
@@ -90,8 +90,8 @@ class Snake(object):
         return "right"
 
     def get_distance_to(self, target):
-        target_x, target_y = target
         x, y = self.get_head()
+        target_x, target_y = target
         return (abs(x - target_x) + abs(y - target_y))
 
     def dir_towards(self, target):

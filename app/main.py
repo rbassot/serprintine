@@ -29,23 +29,23 @@ initialize(): Function to maintain the JSON request data for usability.
 def initialize(request):
 
     #board maintenance
-    width = request["board"]["width"] 
-    height = request['board']['height'] 
+    width = int(request["board"]["width"]) 
+    height = int(request['board']['height']) 
     food = []
 
     for meal in request['board']['food']:
-        x = meal['x']
-        y = meal['y']
+        x = int(meal['x'])
+        y = int(meal['y'])
         food.append((x, y))
 
     board = classes.Board(width, height, food)
 
     #my snake maintenance
-    health = request['you']['health']
+    health = int(request['you']['health'])
     body = []
     for part in request['you']['body']:
-        x = part['x']
-        y = part['y']
+        x = int(part['x'])
+        y = int(part['y'])
         body.append((x, y))
 
     my_snake = classes.Snake(body, health)
@@ -58,8 +58,8 @@ def initialize(request):
         enemy_body = []
 
         for part in snake['body']:
-            x = part['x']
-            y = part['y']
+            x = int(part['x'])
+            y = int(part['y'])
             enemy_body.append((x, y))
 
         enemy_snake = classes.Snake(enemy_body, enemy_health)
@@ -82,7 +82,7 @@ def find_closest_food(snake, board):
             closest_food = meal
             food_dist = snake.get_distance_to(meal)
 
-    if food_dist == -1:
+    if food_dist == board.width:
         return None, None
     
     return closest_food[0], closest_food[1]
