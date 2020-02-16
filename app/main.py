@@ -3,12 +3,12 @@
 import json
 import sys
 import os
-from random import *
+import random
 import bottle
 
 #custom game class module
-sys.path.insert(0, "C:/Users/pbass/OneDrive/code_projects/battlesnake/serprintine/app")
-from classes import *
+#sys.path.insert(0, "C:/Users/pbass/OneDrive/code_projects/battlesnake/serprintine/app")
+import app.classes as classes
 
 from .api import ping_response, start_response, move_response, end_response
 
@@ -36,7 +36,7 @@ def initialize(request):
         y = meal['y']
         food.append((x, y))
 
-    board = Board(width, height, food)
+    board = classes.Board(width, height, food)
 
     #my snake maintenance
     health = request['you']['health']
@@ -46,7 +46,7 @@ def initialize(request):
         y = part['y']
         body.append([x, y])
 
-    my_snake = Snake(body, health)
+    my_snake = classes.Snake(body, health)
 
     #enemy snake maintenance
     enemy_snakes = []
@@ -60,7 +60,7 @@ def initialize(request):
             y = part['y']
             enemy_body.append([x, y])
 
-        enemy_snake = Snake(enemy_body, enemy_health)
+        enemy_snake = classes.Snake(enemy_body, enemy_health)
         enemy_snakes.append(enemy_snake)
 
     return my_snake, enemy_snakes, board
@@ -168,10 +168,10 @@ def start():
 @bottle.post('/move')
 def move():
     #FOR ONLINE USE
-    data = bottle.request.json
+    #data = bottle.request.json
 
     #FOR LOCAL TESTS
-    #data = json.load(bottle.request.body)
+    data = json.load(bottle.request.body)
 
     #print("TEST\n")
     #print(json.dumps(data))
@@ -249,7 +249,7 @@ def move():
     #move = max(move_pairs, key=move_pairs.get)
 
     directions = ['up', 'down', 'left', 'right']
-    index = randint(0,3)
+    index = random.randint(0,3)
     move = directions[index]
     
     return move_response(move)
