@@ -63,8 +63,12 @@ class Snake(object):
         return len(self.body)
 
     def get_body_location(self):
-        x, y = self.body[0]
-        body_x, body_y = self.body[1]
+        try:
+            x, y = self.body[0]
+            body_x, body_y = self.body[1]
+
+        except IndexError:
+            return ""
 
         if x == body_x and y < body_y:
             return "up"

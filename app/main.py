@@ -8,7 +8,7 @@ import bottle
 
 #custom game class module
 sys.path.insert(0, "C:/Users/pbass/OneDrive/code_projects/battlesnake/serprintine/app")
-from .classes import *
+import classes
 
 from .api import ping_response, start_response, move_response, end_response
 
@@ -27,7 +27,7 @@ initialize(): Function to maintain the JSON request data for usability.
 def initialize(request):
 
     #board maintenance
-    width = request['board']['width'] 
+    width = request["board"]["width"] 
     height = request['board']['height'] 
     food = []
 
@@ -167,7 +167,11 @@ def start():
 
 @bottle.post('/move')
 def move():
-    data = bottle.request.json
+    #data = bottle.request.json
+    data = json.load(bottle.request.body)
+
+    print("TEST\n")
+    print(json.dumps(data))
 
     #JSON object maintenance
     my_snake, enemy_snakes, board = initialize(data)
@@ -180,6 +184,8 @@ def move():
         - Total the influence counts after every check and select a direction to move in.
     '''
     move_up = move_down = move_left = move_right = 0
+    horiz_board_edge = False
+    vert_board_edge = False
 
     #get my head coordinates
     head_x, head_y = my_snake.get_head()
@@ -196,7 +202,9 @@ def move():
         vert_board_edge = True
 
     #check snake's previous move/next body part - 2nd priority influence
-    prev_direction = my_snake.get_body_location()
+    prev_direction = ""
+    if data["turn"] >= 3:
+        prev_direction = my_snake.get_body_location()
 
     
 
