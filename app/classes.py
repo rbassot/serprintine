@@ -71,10 +71,10 @@ class Snake(object):
             return ""
 
         if x == body_x and y < body_y:
-            return "up"
+            return "down"
         
         elif x == body_x and y > body_y:
-            return "down"
+            return "up"
 
         elif y == body_y and x > body_x:
             return "left"
