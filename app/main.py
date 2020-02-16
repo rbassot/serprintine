@@ -188,6 +188,8 @@ def move():
 
     #get my head coordinates
     head_x, head_y = my_snake.get_head()
+    #if data["turn"] >= 3:
+        #body_x, body_y = my_snake.get_body()
 
     #check snake's head location on board - 1st priority influence
     if head_x == 0 or head_x == board.width - 1:
@@ -225,10 +227,11 @@ def move():
         possible_moves = ['up', 'down', 'left', 'right']
 
     #priority influence 2
-    try:
-        possible_moves.remove(prev_direction)
-    except ValueError:
-        pass
+    if horiz_board_edge or vert_board_edge:
+        try:
+            possible_moves.remove(prev_direction)
+        except ValueError:
+            pass
     
     #secondary influences
     move_influences = []
