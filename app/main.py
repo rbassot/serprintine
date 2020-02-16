@@ -167,8 +167,8 @@ def start():
 
 @bottle.post('/move')
 def move():
-    #data = bottle.request.json
-    data = json.load(bottle.request.body)
+    data = bottle.request.json
+    #data = json.load(bottle.request.body)
 
     print("TEST\n")
     print(json.dumps(data))
