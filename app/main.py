@@ -3,7 +3,7 @@
 import json
 import sys
 import os
-import random
+from random import *
 import bottle
 
 #custom game class module
@@ -168,10 +168,10 @@ def start():
 @bottle.post('/move')
 def move():
     #FOR ONLINE USE
-    #data = bottle.request.json
+    data = bottle.request.json
 
     #FOR LOCAL TESTS
-    data = json.load(bottle.request.body)
+    #data = json.load(bottle.request.body)
 
     print("TEST\n")
     print(json.dumps(data))
@@ -214,9 +214,6 @@ def move():
 
 
 
-    #print("TEST\n")
-    #print(json.dumps(data))
-
     #----------MOVE DECISION-MAKING----------
     #priority influence 1
     if horiz_board_edge and not vert_board_edge:
@@ -251,9 +248,10 @@ def move():
     move_pairs = dict(zip(possible_moves, move_influences))
     move = max(move_pairs, key=move_pairs.get)
 
-    #directions = ['up', 'down', 'left', 'right']
-    #move = 'up'
-
+    directions = ['up', 'down', 'left', 'right']
+    index = randint(0,3)
+    move = directions[index]
+    
     return move_response(move)
 
 
