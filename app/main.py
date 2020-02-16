@@ -102,7 +102,7 @@ def start():
             initialize your snake state here using the
             request's data if necessary.
     """
-    print(json.dumps(data))
+    #print(json.dumps(data))
 
     return {
         "color": "#00b3b3",
@@ -173,8 +173,8 @@ def move():
     #FOR LOCAL TESTS
     #data = json.load(bottle.request.body)
 
-    print("TEST\n")
-    print(json.dumps(data))
+    #print("TEST\n")
+    #print(json.dumps(data))
 
     #JSON object maintenance
     my_snake, enemy_snakes, board = initialize(data)
@@ -245,8 +245,8 @@ def move():
     if 'right' in possible_moves:
         move_influences.append(move_right)
 
-    move_pairs = dict(zip(possible_moves, move_influences))
-    move = max(move_pairs, key=move_pairs.get)
+    #move_pairs = dict(zip(possible_moves, move_influences))
+    #move = max(move_pairs, key=move_pairs.get)
 
     directions = ['up', 'down', 'left', 'right']
     index = randint(0,3)
