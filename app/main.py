@@ -16,6 +16,7 @@ from .api import ping_response, start_response, move_response, end_response
 LOW_HEALTH = 30
 
 BOARD_EDGE_INFLUENCE = 5
+CLOSE_FOOD_INFLUENCE = 6
 
 
 
@@ -45,7 +46,7 @@ def initialize(request):
     for part in request['you']['body']:
         x = part['x']
         y = part['y']
-        body.append([x, y])
+        body.append((x, y))
 
     my_snake = classes.Snake(body, health)
 
@@ -59,13 +60,32 @@ def initialize(request):
         for part in snake['body']:
             x = part['x']
             y = part['y']
-            enemy_body.append([x, y])
+            enemy_body.append((x, y))
 
         enemy_snake = classes.Snake(enemy_body, enemy_health)
         enemy_snakes.append(enemy_snake)
 
     return my_snake, enemy_snakes, board
 
+
+'''
+find_closest_food(): Calculates the coordinates of the closest food source to the snake's head.
+    Returns a tuple of the x & y coordinates.
+'''
+def find_closest_food(snake, board):
+
+    food_dist = board.width
+    closest_food = ()
+
+    for meal in board.food:
+        if snake.get_distance_to(meal) < food_dist:
+            closest_food = meal
+            food_dist = snake.get_distance_to(meal)
+
+    if food_dist == -1:
+        return None, None
+    
+    return closest_food[0], closest_food[1]
 
 
 
@@ -207,8 +227,20 @@ def move():
     if data["turn"] >= 3:
         prev_direction = my_snake.get_body_location()
 
-    
+    #finding food
+    meal_x, meal_y = find_closest_food(my_snake, board)
+    if meal_x != None and meal_y != None:
+        meal = (meal_x, meal_y)
+        food_dir = my_snake.dir_towards(meal)
 
+        if food_dir == 'up':
+            influence.inc_up(CLOSE_FOOD_INFLUENCE)
+        elif food_dir == 'down':
+            influence.inc_down(CLOSE_FOOD_INFLUENCE)
+        elif food_dir == 'left':
+            influence.inc_left(CLOSE_FOOD_INFLUENCE)
+        elif food_dir == 'right':
+            influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
 
 

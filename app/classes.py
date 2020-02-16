@@ -17,8 +17,8 @@ class Board(object):
     '''
     
     def __init__(self, width, height, food):
-        self.width = width
-        self.height = height
+        self.width = int(width)
+        self.height = int(height)
         self.food = food
 
 
@@ -50,6 +50,14 @@ class Snake(object):
             Returns the direction, from the head, where the snake's next body part exists, and
             therefore the direction the snake certainly shouldn't go next. This also decribes the
             direction that the snake selected on the previous turn.
+
+        get_distance_to(self, target):
+            Returns distance (in amount of moves - int) to the passed target object. Does not worry
+            about direction or order of moves. Target object is a set of x & y coordinates.
+
+        dir_towards(self, target):
+            Returns one of the directions needed to reach the passed target.
+            Target object is a set of x & y coordinates.
         
     '''
     def __init__(self, body, health):
@@ -80,6 +88,25 @@ class Snake(object):
             return "left"
 
         return "right"
+
+    def get_distance_to(self, target):
+        target_x, target_y = target
+        x, y = self.get_head()
+        return (abs(x - target_x) + abs(y - target_y))
+
+    def dir_towards(self, target):
+        target_x, target_y = target
+        x, y = self.get_head()
+        if y > target_y:
+            return "up"
+        if y < target_y:
+            return "down"
+        if x < target_x:
+            return "left"
+        if x > target_x:
+            return "right"
+        return ""
+        
 
 
 class Influence(object):
