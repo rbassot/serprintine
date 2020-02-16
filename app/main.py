@@ -223,9 +223,9 @@ def move():
         vert_board_edge = True
 
     #check snake's previous move/next body part - 2nd priority influence
-    prev_direction = ""
+    invalid_dir = ""
     if data["turn"] >= 3:
-        prev_direction = my_snake.get_body_location()
+        invalid_dir = my_snake.get_body_location()
 
     #finding food
     meal_x, meal_y = find_closest_food(my_snake, board)
@@ -270,11 +270,10 @@ def move():
         possible_moves = ['up', 'down', 'left', 'right']
 
     #priority influence 2
-    if horiz_board_edge or vert_board_edge:
-        try:
-            possible_moves.remove(prev_direction)
-        except ValueError:
-            pass
+    try:
+        possible_moves.remove(invalid_dir)
+    except ValueError:
+        pass
     
     #secondary influences
     move_influences = []
