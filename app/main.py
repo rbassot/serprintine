@@ -277,7 +277,7 @@ def main():
         application,
         host=os.getenv('IP', '0.0.0.0'),
         port=os.getenv('PORT', '8080'),
-        debug=os.getenv('DEBUG', True)
+        #debug=os.getenv('DEBUG', True)
     )
 
 if __name__ == '__main__':
