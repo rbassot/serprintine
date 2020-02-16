@@ -7,7 +7,6 @@ import random
 import bottle
 
 #custom game class module
-#sys.path.insert(0, "C:/Users/pbass/OneDrive/code_projects/battlesnake/serprintine/app")
 import app.classes as classes
 
 from .api import ping_response, start_response, move_response, end_response
@@ -167,10 +166,7 @@ def start():
 
 @bottle.post('/move')
 def move():
-    #FOR ONLINE USE
     #data = bottle.request.json
-
-    #FOR LOCAL TESTS
     data = json.load(bottle.request.body)
 
     #print("TEST\n")
@@ -245,12 +241,12 @@ def move():
     if 'right' in possible_moves:
         move_influences.append(move_right)
 
-    #move_pairs = dict(zip(possible_moves, move_influences))
-    #move = max(move_pairs, key=move_pairs.get)
+    move_pairs = dict(zip(possible_moves, move_influences))
+    move = max(move_pairs, key=move_pairs.get)
 
-    directions = ['up', 'down', 'left', 'right']
-    index = random.randint(0,3)
-    move = directions[index]
+    #directions = ['up', 'down', 'left', 'right']
+    #index = random.randint(0,3)
+    #move = directions[index]
     
     return move_response(move)
 
