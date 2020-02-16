@@ -220,8 +220,19 @@ def move():
     elif vert_board_edge and not horiz_board_edge:
         possible_moves = ['left', 'right']
 
-    #Case where snake is in a corner of the board???
-    #elif horiz_board_edge and vert_board_edge:        
+    elif horiz_board_edge and vert_board_edge:
+        #top left corner
+        if head_x == 0 and head_y == 0:
+            possible_moves = ['down', 'right']
+        #top right corner
+        elif head_x == board.width - 1 and head_y == 0:
+            possible_moves = ['down', 'left']
+        #bottom left corner
+        elif head_x == 0 and head_y == board.height - 1:
+            possible_moves = ['up', 'right']
+        #bottom right corner
+        elif head_x == board.width - 1 and head_y == board.height - 1:
+            possible_moves = ['up', 'left']
 
     else:
         possible_moves = ['up', 'down', 'left', 'right']
