@@ -41,14 +41,14 @@ class Snake(object):
             Creates an instance of an existing snake in the arena.
 
         get_head(self):
-            Returns the head of the snake even if it doesn't have a head attribute.
+            Returns the head of the snake, even if it doesn't have a head attribute.
 
         get_length(self):
             Returns the total length of the snake.
 
-        get_body_location(self):
-            Returns the direction, from the head, where the snake's next body part exists, and
-            therefore the direction the snake certainly shouldn't go next. This also decribes the
+        get_invalid_dir(self):
+            Returns the direction, from the head, where the snake cannot travel, determined by
+            the location of its next body part. This also decribes the
             direction that the snake selected on the previous turn.
 
         get_distance_to(self, target):
@@ -70,7 +70,7 @@ class Snake(object):
     def get_length(self):
         return len(self.body)
 
-    def get_body_location(self):
+    def get_invalid_dir(self):
         try:
             x, y = self.body[0]
             body_x, body_y = self.body[1]

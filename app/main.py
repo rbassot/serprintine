@@ -69,15 +69,36 @@ def initialize(request):
 
 
 '''
-find_closest_food(): Calculates the coordinates of the closest food source to the snake's head.
-    Returns a tuple of the x & y coordinates.
+find_food_BFS(): Calculates the path of coordinates of the closest food source to the snake's
+    head, through a breadth-first search. Returns a tuple of the x & y coordinates.
 '''
-def find_closest_food(snake, board):
+def find_food_BFS(snake, board):
 
     food_dist = board.width
-    closest_food = ()
+    path_to_food = []
+    start = snake.get_head()
+    queue = [start]
 
-    for meal in board.food:
+    while queue:
+        tile = queue.pop(0)
+        if tile not in path_to_food:
+            path_to_food.append(tile)
+            tile_x, tile_y = tile
+
+            #add valid adjacent vertices to the queue
+            queue.extend((tile_x, tile_y - 1) if snake.get_invalid_dir() != 'up' else None)
+            queue.extend((tile_x, tile_y + 1) if snake.get_invalid_dir() != 'down' else None)
+            queue.extend((tile_x - 1, tile_y) if snake.get_invalid_dir() != 'left' else None)
+            queue.extend((tile_x + 1, tile_y) if snake.get_invalid_dir() != 'right' else None)
+
+            if tile in board.food:
+                queue.clear()
+
+    #remove first tile coordinates where (head exists)
+    path_to_food[1:]
+    return path_to_food
+
+    '''for meal in board.food:
         if snake.get_distance_to(meal) < food_dist:
             closest_food = meal
             food_dist = snake.get_distance_to(meal)
@@ -85,7 +106,7 @@ def find_closest_food(snake, board):
     if food_dist == board.width:
         return None, None
     
-    return closest_food[0], closest_food[1]
+    return closest_food[0], closest_food[1]'''
 
 
 
@@ -225,22 +246,20 @@ def move():
     #check snake's previous move/next body part - 2nd priority influence
     invalid_dir = ""
     if data["turn"] >= 3:
-        invalid_dir = my_snake.get_body_location()
+        invalid_dir = my_snake.get_invalid_dir()
 
     #finding food
-    meal_x, meal_y = find_closest_food(my_snake, board)
-    if meal_x != None and meal_y != None:
-        meal = (meal_x, meal_y)
-        food_dir = my_snake.dir_towards(meal)
+    direct_path = find_food_BFS(my_snake, board)
+    food_dir = my_snake.dir_towards(direct_path[0])
 
-        if food_dir == 'up':
-            influence.inc_up(CLOSE_FOOD_INFLUENCE)
-        elif food_dir == 'down':
-            influence.inc_down(CLOSE_FOOD_INFLUENCE)
-        elif food_dir == 'left':
-            influence.inc_left(CLOSE_FOOD_INFLUENCE)
-        elif food_dir == 'right':
-            influence.inc_right(CLOSE_FOOD_INFLUENCE)
+    if food_dir == 'up':
+        influence.inc_up(CLOSE_FOOD_INFLUENCE)
+    elif food_dir == 'down':
+        influence.inc_down(CLOSE_FOOD_INFLUENCE)
+    elif food_dir == 'left':
+        influence.inc_left(CLOSE_FOOD_INFLUENCE)
+    elif food_dir == 'right':
+        influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
 
 
