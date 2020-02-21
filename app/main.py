@@ -76,7 +76,7 @@ def find_food_BFS(snake, board):
 
     food_dist = board.width
     path_to_food = []
-    start = snake.get_head()
+    start = tuple(snake.get_head())
     queue = [start]
 
     while queue:
@@ -85,11 +85,15 @@ def find_food_BFS(snake, board):
             path_to_food.append(tile)
             tile_x, tile_y = tile
 
-            #add valid adjacent vertices to the queue
-            queue.extend((tile_x, tile_y - 1) if snake.get_invalid_dir() != 'up' else None)
-            queue.extend((tile_x, tile_y + 1) if snake.get_invalid_dir() != 'down' else None)
-            queue.extend((tile_x - 1, tile_y) if snake.get_invalid_dir() != 'left' else None)
-            queue.extend((tile_x + 1, tile_y) if snake.get_invalid_dir() != 'right' else None)
+            #add the next valid adjacent tiles to the queue
+            if snake.get_invalid_dir() != 'up':
+                queue.append((tile_x, tile_y - 1))
+            if snake.get_invalid_dir() != 'down':
+                queue.append((tile_x, tile_y + 1))
+            if snake.get_invalid_dir() != 'left':
+                queue.append((tile_x - 1, tile_y))
+            if snake.get_invalid_dir() != 'right':
+                queue.append((tile_x + 1, tile_y))
 
             if tile in board.food:
                 queue.clear()
