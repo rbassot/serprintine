@@ -230,8 +230,8 @@ def move():
 
     #check for snake's head location at board edge - 1st priority influence
     if head_x == 0 or head_x == board.width - 1:
-        #influence.inc_up(BOARD_EDGE_INFLUENCE)
-        #influence.inc_down(BOARD_EDGE_INFLUENCE)
+        influence.inc_up(BOARD_EDGE_INFLUENCE)
+        influence.inc_down(BOARD_EDGE_INFLUENCE)
         horiz_board_edge = True
 
         if head_x == 0:
@@ -241,8 +241,8 @@ def move():
             right_board_edge = True
 
     if head_y == 0 or head_y == board.height - 1:
-        #influence.inc_left(BOARD_EDGE_INFLUENCE)
-        #influence.inc_right(BOARD_EDGE_INFLUENCE)
+        influence.inc_left(BOARD_EDGE_INFLUENCE)
+        influence.inc_right(BOARD_EDGE_INFLUENCE)
         vert_board_edge = True
 
         if head_y == 0:
@@ -282,13 +282,13 @@ def move():
             possible_moves = ['up', 'down', 'right']
 
             if int(data["turn"]) >= 3:
-                influence.inc_right(BOARD_EDGE_INFLUENCE)
+                influence.inc_right(BOARD_EDGE_INFLUENCE + 1)
 
         elif right_board_edge:
             possible_moves = ['up', 'down', 'left']
 
             if int(data["turn"]) >= 3:
-                influence.inc_left(BOARD_EDGE_INFLUENCE)
+                influence.inc_left(BOARD_EDGE_INFLUENCE + 1)
 
     elif vert_board_edge and not horiz_board_edge:
 
@@ -296,13 +296,13 @@ def move():
             possible_moves = ['down', 'left', 'right']
 
             if int(data["turn"]) >= 3:
-                influence.inc_down(BOARD_EDGE_INFLUENCE)
+                influence.inc_down(BOARD_EDGE_INFLUENCE + 1)
 
         elif bottom_board_edge:
             possible_moves = ['up', 'left', 'right']
 
             if int(data["turn"]) >= 3:
-                influence.inc_up(BOARD_EDGE_INFLUENCE)
+                influence.inc_up(BOARD_EDGE_INFLUENCE + 1)
 
         else:    
             possible_moves = ['left', 'right']
