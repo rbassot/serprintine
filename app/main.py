@@ -63,7 +63,7 @@ def initialize(request):
     enemy_snakes = []
     for snake in request['board']['snakes']:
 
-        enemy_health = snake['health']
+        enemy_health = int(snake['health'])
         enemy_body = []
 
         for part in snake['body']:
@@ -84,7 +84,6 @@ def initialize(request):
 '''
 find_food: Calculates the coordinates of the closest food source to the snake's
     head, using Pythagorus. Returns a tuple of the x & y coordinates.
-
 '''
 def find_food(snake, board):
 
@@ -233,10 +232,22 @@ def move():
         influence.inc_down(BOARD_EDGE_INFLUENCE)
         horiz_board_edge = True
 
+        if head_x == 0:
+            left_board_edge = True
+
+        else:
+            right_board_edge = True
+
     if head_y == 0 or head_y == board.height - 1:
         influence.inc_left(BOARD_EDGE_INFLUENCE)
         influence.inc_right(BOARD_EDGE_INFLUENCE)
         vert_board_edge = True
+
+        if head_y == 0:
+            top_board_edge = True
+
+        else:
+            bottom_board_edge = True
 
     #check snake's previous move/next body part - 2nd priority influence
     invalid_dir = ""
@@ -264,10 +275,22 @@ def move():
     #----------MOVE DECISION-MAKING----------
     #priority influence 1
     if horiz_board_edge and not vert_board_edge:
-        possible_moves = ['up', 'down']
-    
+        if left_board_edge:
+            possible_moves = ['up', 'down', 'right']
+
+        elif right_board_edge:
+            possible_moves = ['up', 'down', 'left']
+
     elif vert_board_edge and not horiz_board_edge:
-        possible_moves = ['left', 'right']
+
+        if top_board_edge:
+            possible_moves = ['down', 'left', 'right']
+
+        elif bottom_board_edge:
+            possible_moves = ['up', 'left', 'right']
+
+        else:    
+            possible_moves = ['left', 'right']
 
     elif horiz_board_edge and vert_board_edge:
         #top left corner
