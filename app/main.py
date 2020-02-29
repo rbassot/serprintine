@@ -280,21 +280,29 @@ def move():
     if horiz_board_edge and not vert_board_edge:
         if left_board_edge:
             possible_moves = ['up', 'down', 'right']
-            influence.inc_right(BOARD_EDGE_INFLUENCE)
+
+            if int(data["turn"]) >= 3:
+                influence.inc_right(BOARD_EDGE_INFLUENCE)
 
         elif right_board_edge:
             possible_moves = ['up', 'down', 'left']
-            influence.inc_left(BOARD_EDGE_INFLUENCE)
+
+            if int(data["turn"]) >= 3:
+                influence.inc_left(BOARD_EDGE_INFLUENCE)
 
     elif vert_board_edge and not horiz_board_edge:
 
         if top_board_edge:
             possible_moves = ['down', 'left', 'right']
-            influence.inc_down(BOARD_EDGE_INFLUENCE)
+
+            if int(data["turn"]) >= 3:
+                influence.inc_down(BOARD_EDGE_INFLUENCE)
 
         elif bottom_board_edge:
             possible_moves = ['up', 'left', 'right']
-            influence.inc_up(BOARD_EDGE_INFLUENCE)
+
+            if int(data["turn"]) >= 3:
+                influence.inc_up(BOARD_EDGE_INFLUENCE)
 
         else:    
             possible_moves = ['left', 'right']
