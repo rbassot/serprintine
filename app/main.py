@@ -19,6 +19,8 @@ LOW_HEALTH = 30
 BOARD_EDGE_INFLUENCE = 5
 CLOSE_FOOD_INFLUENCE = 10
 
+CLOSE_FOOD_MAX_DIST = 5
+
 
 
 
@@ -100,7 +102,7 @@ def find_food(snake, board):
                 closest_dist = hyp
                 closest_food = meal
         
-        return meal
+        return meal, closest_dist
     return False
 
 
@@ -256,9 +258,9 @@ def move():
 
     #finding food
     if int(data["turn"]) >= 3:
-        closest_food = find_food(my_snake, board)
+        closest_food, closest_dist = find_food(my_snake, board)
 
-        if closest_food:
+        if closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST:
             food_dirs = my_snake.dirs_towards(closest_food)
 
             if 'up' in food_dirs:
