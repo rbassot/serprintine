@@ -1,3 +1,4 @@
+import math
 
 class Board(object):
     '''
@@ -9,6 +10,7 @@ class Board(object):
         width - width of the game board.
         height - height of the game board.
         food - list of x & y tuples that describe the coordinates of all food on the board.
+        grid - a 2D list of values describing the objects on the board at all coordinates.
     
     ----------
     METHODS:
@@ -16,11 +18,11 @@ class Board(object):
             Creates an instance of a Battlesnake game board.
     '''
     
-    def __init__(self, width, height, food):
+    def __init__(self, width, height, food, grid):
         self.width = width
         self.height = height
         self.food = food
-
+        self.grid = grid
 
 
 class Snake(object):
@@ -52,11 +54,11 @@ class Snake(object):
             direction that the snake selected on the previous turn.
 
         get_distance_to(self, target):
-            Returns distance (in amount of moves - int) to the passed target object. Does not worry
-            about direction or order of moves. Target object is a set of x & y coordinates.
+            Returns the direct distance (float) to the passed target object by using Pythagorus.
+            Does not worry about direction or order of moves. Target object is a set of x & y coordinates.
 
-        dir_towards(self, target):
-            Returns one of the directions needed to reach the passed target.
+        dirs_towards(self, target):
+            Returns all valid directions (list of strings) towards approaching the passed target.
             Target object is a set of x & y coordinates.
         
     '''
@@ -65,7 +67,7 @@ class Snake(object):
         self.health = health
 
     def get_head(self):
-        return self.body[0]
+        return tuple(self.body[0])
 
     def get_length(self):
         return len(self.body)
@@ -92,20 +94,21 @@ class Snake(object):
     def get_distance_to(self, target):
         x, y = self.get_head()
         target_x, target_y = target
-        return (abs(x - target_x) + abs(y - target_y))
+        return float(math.sqrt(  abs((x - target_x)^2) + abs((y - target_y)^2)  ))
 
-    def dir_towards(self, target):
+    def dirs_towards(self, target):
         target_x, target_y = target
         x, y = self.get_head()
-        if y > target_y:
-            return "up"
+        directions = []
         if y < target_y:
-            return "down"
-        if x < target_x:
-            return "left"
+            directions.append("up")
+        if y > target_y:
+            directions.append("down")
         if x > target_x:
-            return "right"
-        return ""
+            directions.append("left")
+        if x < target_x:
+            directions.append("right")
+        return directions
         
 
 

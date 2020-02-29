@@ -2,10 +2,10 @@
     "game": {
       "id": "game-id-string"
     },
-    "turn": 4,
+    "turn": 4,  
     "board": {
       "height": 15,
-      "width": "15",
+      "width": 15,
       "food": [
         {
           "x": 1,
@@ -19,8 +19,8 @@
           "health": 90,
           "body": [
             {
-              "x": 1,
-              "y": 3
+              "x": 5,
+              "y": 6
             }
           ]
         }
@@ -32,7 +32,7 @@
       "health": 90,
       "body": [
         {
-          "x": 1,
+          "x": 2,
           "y": 3
         }
       ]
