@@ -100,9 +100,9 @@ class Snake(object):
         target_x, target_y = target
         x, y = self.get_head()
         directions = []
-        if y < target_y:
-            directions.append("up")
         if y > target_y:
+            directions.append("up")
+        if y < target_y:
             directions.append("down")
         if x > target_x:
             directions.append("left")

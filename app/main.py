@@ -17,7 +17,7 @@ from .api import ping_response, start_response, move_response, end_response
 LOW_HEALTH = 30
 
 BOARD_EDGE_INFLUENCE = 5
-CLOSE_FOOD_INFLUENCE = 6
+CLOSE_FOOD_INFLUENCE = 10
 
 
 
@@ -244,7 +244,7 @@ def move():
         invalid_dir = my_snake.get_invalid_dir()
 
     #finding food
-    if data["turn"] >= 3:
+    if int(data["turn"]) >= 3:
         closest_food = find_food(my_snake, board)
 
         if closest_food:
@@ -252,11 +252,11 @@ def move():
 
             if 'up' in food_dirs:
                 influence.inc_up(CLOSE_FOOD_INFLUENCE)
-            elif 'down' in food_dirs:
+            if 'down' in food_dirs:
                 influence.inc_down(CLOSE_FOOD_INFLUENCE)
-            elif 'left' in food_dirs:
+            if 'left' in food_dirs:
                 influence.inc_left(CLOSE_FOOD_INFLUENCE)
-            elif 'right' in food_dirs:
+            if 'right' in food_dirs:
                 influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
 
