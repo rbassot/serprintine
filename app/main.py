@@ -230,8 +230,8 @@ def move():
 
     #check for snake's head location at board edge - 1st priority influence
     if head_x == 0 or head_x == board.width - 1:
-        influence.inc_up(BOARD_EDGE_INFLUENCE)
-        influence.inc_down(BOARD_EDGE_INFLUENCE)
+        #influence.inc_up(BOARD_EDGE_INFLUENCE)
+        #influence.inc_down(BOARD_EDGE_INFLUENCE)
         horiz_board_edge = True
 
         if head_x == 0:
@@ -241,8 +241,8 @@ def move():
             right_board_edge = True
 
     if head_y == 0 or head_y == board.height - 1:
-        influence.inc_left(BOARD_EDGE_INFLUENCE)
-        influence.inc_right(BOARD_EDGE_INFLUENCE)
+        #influence.inc_left(BOARD_EDGE_INFLUENCE)
+        #influence.inc_right(BOARD_EDGE_INFLUENCE)
         vert_board_edge = True
 
         if head_y == 0:
@@ -276,20 +276,25 @@ def move():
 
     #----------MOVE DECISION-MAKING----------
     #priority influence 1
+    #ADDED - drive snake away from edge, towards middle
     if horiz_board_edge and not vert_board_edge:
         if left_board_edge:
             possible_moves = ['up', 'down', 'right']
+            influence.inc_right(BOARD_EDGE_INFLUENCE)
 
         elif right_board_edge:
             possible_moves = ['up', 'down', 'left']
+            influence.inc_left(BOARD_EDGE_INFLUENCE)
 
     elif vert_board_edge and not horiz_board_edge:
 
         if top_board_edge:
             possible_moves = ['down', 'left', 'right']
+            influence.inc_down(BOARD_EDGE_INFLUENCE)
 
         elif bottom_board_edge:
             possible_moves = ['up', 'left', 'right']
+            influence.inc_up(BOARD_EDGE_INFLUENCE)
 
         else:    
             possible_moves = ['left', 'right']
