@@ -16,7 +16,7 @@ from .api import ping_response, start_response, move_response, end_response
 #----------GAME CONSTANTS----------
 LOW_HEALTH = 30
 
-BOARD_EDGE_INFLUENCE = 5
+BOARD_EDGE_INFLUENCE = 10
 CLOSE_FOOD_INFLUENCE = 10
 
 CLOSE_FOOD_MAX_DIST = 5
@@ -110,7 +110,7 @@ def find_food(snake, board):
 Function to check the possible states of a snake in relation to the game board.
     States are strings appended to a snake's .states[] attribute.
 '''
-def get_states(snake, board):
+def get_states(snake, board, influence):
 
     #check for snake's head location at board edges - 1st priority influence
     head_x, head_y = snake.get_head()
@@ -144,10 +144,12 @@ def get_states(snake, board):
 Function to check all the valid moves that a snake can make during a turn.
     Moving into a wall/snake/own body are considered invalid.
 '''
-def check_valid_moves(snake, board):
+def check_valid_moves(snake, board, influence):
 
     #---------- 1 ----------
     #check board edges for valid moves
+    head_x, head_y = snake.get_head()
+
     if 'horiz_board_edge' in snake.states and 'vert_board_edge' not in snake.states:
         if 'left_board_edge' in snake.states:
             possible_moves = ['up', 'down', 'right']
@@ -199,9 +201,9 @@ def check_valid_moves(snake, board):
 
     #---------- 2 ----------
     #check board components (enemy/own body) for valid moves
-    for move in range(len(possible_moves)):
+    tile_x, tile_y = snake.get_head()
 
-        tile_x, tile_y = snake.get_head()
+    for move in range(len(possible_moves)):
 
         if move == 'up':
             spacetaker = grid[tile_x][tile_y - 1]
@@ -362,7 +364,7 @@ def move():
     influence = classes.Influence()
 
     #get snake states before calculation
-    get_states(my_snake, board)
+    get_states(my_snake, board, influence)
 
     #get my_snake head coordinates
     #head_x, head_y = my_snake.get_head()
@@ -394,7 +396,7 @@ def move():
     #----------MOVE DECISION-MAKING----------
     #priority influence 1
     #ADDED - drive snake away from edge, towards middle
-    possible_moves = check_valid_moves(my_snake, board)
+    possible_moves = check_valid_moves(my_snake, board, influence)
 
     #priority influence 2
     try:
