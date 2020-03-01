@@ -17,7 +17,7 @@ from .api import ping_response, start_response, move_response, end_response
 LOW_HEALTH = 30
 
 BOARD_EDGE_INFLUENCE = 10
-CLOSE_FOOD_INFLUENCE = 10
+CLOSE_FOOD_INFLUENCE = 5
 
 CLOSE_FOOD_MAX_DIST = 5
 
