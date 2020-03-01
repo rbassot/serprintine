@@ -205,8 +205,8 @@ def check_valid_moves(snake, board, influence):
 
     for move in range(len(possible_moves)):
 
-        if move == 'up':
-            spacetaker = grid[int(tile_x)][int(tile_y - 1)]
+        if possible_moves[move] == 'up':
+            spacetaker = board.grid[int(tile_x)][int(tile_y - 1)]
 
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
@@ -214,8 +214,8 @@ def check_valid_moves(snake, board, influence):
                 move = move - 1
                 continue
 
-        elif move == 'down':
-            spacetaker = grid[tile_x][tile_y + 1]
+        elif possible_moves[move] == 'down':
+            spacetaker = board.grid[tile_x][tile_y + 1]
 
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
@@ -223,8 +223,8 @@ def check_valid_moves(snake, board, influence):
                 move = move - 1
                 continue
 
-        elif move == 'left':
-            spacetaker = grid[tile_x - 1][tile_y]
+        elif possible_moves[move] == 'left':
+            spacetaker = board.grid[tile_x - 1][tile_y]
 
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
@@ -232,8 +232,8 @@ def check_valid_moves(snake, board, influence):
                 move = move - 1
                 continue
 
-        elif move == 'right':
-            spacetaker = grid[tile_x + 1][tile_y]
+        elif possible_moves[move] == 'right':
+            spacetaker = board.grid[tile_x + 1][tile_y]
 
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
