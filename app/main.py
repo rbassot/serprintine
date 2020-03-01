@@ -206,13 +206,12 @@ def check_valid_moves(snake, board, influence):
     for move in range(len(possible_moves)):
 
         if move == 'up':
-            spacetaker = grid[tile_x][tile_y - 1]
+            spacetaker = grid[int(tile_x)][int(tile_y - 1)]
 
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
                 possible_moves.remove('up')
-            
-            continue
+                continue
 
         elif move == 'down':
             spacetaker = grid[tile_x][tile_y + 1]
@@ -220,8 +219,7 @@ def check_valid_moves(snake, board, influence):
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
                 possible_moves.remove('down')
-            
-            continue
+                continue
 
         elif move == 'left':
             spacetaker = grid[tile_x - 1][tile_y]
@@ -229,8 +227,7 @@ def check_valid_moves(snake, board, influence):
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
                 possible_moves.remove('left')
-            
-            continue
+                continue
 
         elif move == 'right':
             spacetaker = grid[tile_x + 1][tile_y]
@@ -238,8 +235,7 @@ def check_valid_moves(snake, board, influence):
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
                 possible_moves.remove('right')
-            
-            continue
+                continue
 
 
     return possible_moves
@@ -372,7 +368,7 @@ def move():
 
 
     #check snake's previous move/next body part - 2nd priority influence
-    invalid_dir = ""
+    invalid_dir = ''
     if board.turn >= 3:
         invalid_dir = my_snake.get_invalid_dir()
 
