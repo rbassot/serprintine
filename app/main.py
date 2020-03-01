@@ -78,7 +78,7 @@ def initialize(request):
         enemy_snakes.append(enemy_snake)
     
     #complete board object
-    board = classes.Board(width, height, food, grid)
+    board = classes.Board(width, height, food, grid, int(request['turn']))
 
     return my_snake, enemy_snakes, board
 
@@ -104,6 +104,144 @@ def find_food(snake, board):
         
         return meal, closest_dist
     return False
+
+
+'''
+Function to check the possible states of a snake in relation to the game board.
+    States are strings appended to a snake's .states[] attribute.
+'''
+def get_states(snake, board):
+
+    #check for snake's head location at board edges - 1st priority influence
+    head_x, head_y = snake.get_head()
+
+    if head_x == 0 or head_x == board.width - 1:
+        influence.inc_up(BOARD_EDGE_INFLUENCE)
+        influence.inc_down(BOARD_EDGE_INFLUENCE)
+        snake.add_state('horiz_board_edge')
+
+        if head_x == 0:
+            snake.add_state('left_board_edge')
+
+        else:
+            snake.add_state('right_board_edge')
+
+    if head_y == 0 or head_y == board.height - 1:
+        influence.inc_left(BOARD_EDGE_INFLUENCE)
+        influence.inc_right(BOARD_EDGE_INFLUENCE)
+        snake.add_state('vert_board_edge')
+
+        if head_y == 0:
+            snake.add_state('top_board_edge')
+
+        else:
+            snake.add_state('bottom_board_edge')
+
+    return
+
+
+'''
+Function to check all the valid moves that a snake can make during a turn.
+    Moving into a wall/snake/own body are considered invalid.
+'''
+def check_valid_moves(snake, board):
+
+    #---------- 1 ----------
+    #check board edges for valid moves
+    if 'horiz_board_edge' in snake.states and 'vert_board_edge' not in snake.states:
+        if 'left_board_edge' in snake.states:
+            possible_moves = ['up', 'down', 'right']
+
+            if board.turn >= 3:
+                influence.inc_right(BOARD_EDGE_INFLUENCE + 1)
+
+        elif 'right_board_edge' in snake.states:
+            possible_moves = ['up', 'down', 'left']
+
+            if board.turn >= 3:
+                influence.inc_left(BOARD_EDGE_INFLUENCE + 1)
+
+    elif 'vert_board_edge' in snake.states and 'horiz_board_edge' not in snake.states:
+
+        if 'top_board_edge' in snake.states:
+            possible_moves = ['down', 'left', 'right']
+
+            if board.turn >= 3:
+                influence.inc_down(BOARD_EDGE_INFLUENCE + 1)
+
+        elif 'bottom_board_edge' in snake.states:
+            possible_moves = ['up', 'left', 'right']
+
+            if board.turn >= 3:
+                influence.inc_up(BOARD_EDGE_INFLUENCE + 1)
+
+        else:    
+            possible_moves = ['left', 'right']
+
+    elif 'horiz_board_edge' in snake.states and 'vert_board_edge' in snake.states:
+
+        #top left corner
+        if head_x == 0 and head_y == 0:
+            possible_moves = ['down', 'right']
+        #top right corner
+        elif head_x == board.width - 1 and head_y == 0:
+            possible_moves = ['down', 'left']
+        #bottom left corner
+        elif head_x == 0 and head_y == board.height - 1:
+            possible_moves = ['up', 'right']
+        #bottom right corner
+        elif head_x == board.width - 1 and head_y == board.height - 1:
+            possible_moves = ['up', 'left']
+
+    else:
+        possible_moves = ['up', 'down', 'left', 'right']
+
+
+    #---------- 2 ----------
+    #check board components (enemy/own body) for valid moves
+    for move in range(len(possible_moves)):
+
+        tile_x, tile_y = snake.get_head()
+
+        if move == 'up':
+            spacetaker = grid[tile_x][tile_y - 1]
+
+            #not a valid tile
+            if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
+                possible_moves.remove('up')
+            
+            continue
+
+        elif move == 'down':
+            spacetaker = grid[tile_x][tile_y + 1]
+
+            #not a valid tile
+            if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
+                possible_moves.remove('down')
+            
+            continue
+
+        elif move == 'left':
+            spacetaker = grid[tile_x - 1][tile_y]
+
+            #not a valid tile
+            if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
+                possible_moves.remove('left')
+            
+            continue
+
+        elif move == 'right':
+            spacetaker = grid[tile_x + 1][tile_y]
+
+            #not a valid tile
+            if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
+                possible_moves.remove('right')
+            
+            continue
+
+
+    return possible_moves
+
 
 
 @bottle.route('/')
@@ -222,42 +360,22 @@ def move():
         - Total the influence counts after every check and finally select a direction to move in.
     '''
     influence = classes.Influence()
-    horiz_board_edge = False
-    vert_board_edge = False
+
+    #get snake states before calculation
+    get_states(my_snake, board)
 
     #get my_snake head coordinates
-    head_x, head_y = my_snake.get_head()
+    #head_x, head_y = my_snake.get_head()
 
-    #check for snake's head location at board edge - 1st priority influence
-    if head_x == 0 or head_x == board.width - 1:
-        influence.inc_up(BOARD_EDGE_INFLUENCE)
-        influence.inc_down(BOARD_EDGE_INFLUENCE)
-        horiz_board_edge = True
 
-        if head_x == 0:
-            left_board_edge = True
-
-        else:
-            right_board_edge = True
-
-    if head_y == 0 or head_y == board.height - 1:
-        influence.inc_left(BOARD_EDGE_INFLUENCE)
-        influence.inc_right(BOARD_EDGE_INFLUENCE)
-        vert_board_edge = True
-
-        if head_y == 0:
-            top_board_edge = True
-
-        else:
-            bottom_board_edge = True
 
     #check snake's previous move/next body part - 2nd priority influence
     invalid_dir = ""
-    if data["turn"] >= 3:
+    if board.turn >= 3:
         invalid_dir = my_snake.get_invalid_dir()
 
     #finding food
-    if int(data["turn"]) >= 3:
+    if board.turn >= 3:
         closest_food, closest_dist = find_food(my_snake, board)
 
         if closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST:
@@ -273,56 +391,10 @@ def move():
                 influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
 
-
     #----------MOVE DECISION-MAKING----------
     #priority influence 1
     #ADDED - drive snake away from edge, towards middle
-    if horiz_board_edge and not vert_board_edge:
-        if left_board_edge:
-            possible_moves = ['up', 'down', 'right']
-
-            if int(data["turn"]) >= 3:
-                influence.inc_right(BOARD_EDGE_INFLUENCE + 1)
-
-        elif right_board_edge:
-            possible_moves = ['up', 'down', 'left']
-
-            if int(data["turn"]) >= 3:
-                influence.inc_left(BOARD_EDGE_INFLUENCE + 1)
-
-    elif vert_board_edge and not horiz_board_edge:
-
-        if top_board_edge:
-            possible_moves = ['down', 'left', 'right']
-
-            if int(data["turn"]) >= 3:
-                influence.inc_down(BOARD_EDGE_INFLUENCE + 1)
-
-        elif bottom_board_edge:
-            possible_moves = ['up', 'left', 'right']
-
-            if int(data["turn"]) >= 3:
-                influence.inc_up(BOARD_EDGE_INFLUENCE + 1)
-
-        else:    
-            possible_moves = ['left', 'right']
-
-    elif horiz_board_edge and vert_board_edge:
-        #top left corner
-        if head_x == 0 and head_y == 0:
-            possible_moves = ['down', 'right']
-        #top right corner
-        elif head_x == board.width - 1 and head_y == 0:
-            possible_moves = ['down', 'left']
-        #bottom left corner
-        elif head_x == 0 and head_y == board.height - 1:
-            possible_moves = ['up', 'right']
-        #bottom right corner
-        elif head_x == board.width - 1 and head_y == board.height - 1:
-            possible_moves = ['up', 'left']
-
-    else:
-        possible_moves = ['up', 'down', 'left', 'right']
+    possible_moves = check_valid_moves(my_snake, board)
 
     #priority influence 2
     try:
@@ -343,10 +415,6 @@ def move():
 
     move_pairs = dict(zip(possible_moves, move_influences))
     move = max(move_pairs, key=move_pairs.get)
-
-    #directions = ['up', 'down', 'left', 'right']
-    #index = random.randint(0,3)
-    #move = directions[index]
     
     return move_response(move)
 

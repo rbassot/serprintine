@@ -18,11 +18,13 @@ class Board(object):
             Creates an instance of a Battlesnake game board.
     '''
     
-    def __init__(self, width, height, food, grid):
+    def __init__(self, width, height, food, grid, turn):
         self.width = width
         self.height = height
         self.food = food
         self.grid = grid
+        self.turn = turn
+
 
 
 class Snake(object):
@@ -36,6 +38,8 @@ class Snake(object):
             (x, y) - tuple holding the x & y coordinates of a portion of the snake
             
         health - integer representing the remaining health of the snake
+
+        states - list of strings containing the important states of the snake on a current move
 
     ----------
     METHODS:
@@ -66,8 +70,13 @@ class Snake(object):
         self.body = body
         self.health = health
 
+        self.states = []
+
     def get_head(self):
         return tuple(self.body[0])
+
+    def get_tail(self):
+        return tuple(self.body[len(self.body) - 1])
 
     def get_length(self):
         return len(self.body)
@@ -109,6 +118,9 @@ class Snake(object):
         if x < target_x:
             directions.append("right")
         return directions
+
+    def add_state(self, state):
+        self.states.append(state)
         
 
 
