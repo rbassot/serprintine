@@ -211,6 +211,7 @@ def check_valid_moves(snake, board, influence):
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
                 possible_moves.remove('up')
+                move = move - 1
                 continue
 
         elif move == 'down':
@@ -219,6 +220,7 @@ def check_valid_moves(snake, board, influence):
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
                 possible_moves.remove('down')
+                move = move - 1
                 continue
 
         elif move == 'left':
@@ -227,6 +229,7 @@ def check_valid_moves(snake, board, influence):
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
                 possible_moves.remove('left')
+                move = move - 1
                 continue
 
         elif move == 'right':
@@ -235,6 +238,7 @@ def check_valid_moves(snake, board, influence):
             #not a valid tile
             if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
                 possible_moves.remove('right')
+                move = move - 1
                 continue
 
 
