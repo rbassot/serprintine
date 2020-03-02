@@ -16,6 +16,9 @@ class Board(object):
     METHODS:
         __init__(self, width, height, food):
             Creates an instance of a Battlesnake game board.
+
+        get_grid_space(self, x, y):
+            Returns the value (string) occupying the tile at the x & y coordinates of the grid.
     '''
     
     def __init__(self, width, height, food, grid, turn):
@@ -25,6 +28,15 @@ class Board(object):
         self.grid = grid
         self.turn = turn
 
+    def get_grid_space(self, x, y):
+        try:
+            row = y
+            col = x
+            grid_space = self.grid[row][col]
+
+        except IndexError:
+            return ''
+        return grid_space
 
 
 class Snake(object):

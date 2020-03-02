@@ -48,7 +48,9 @@ def initialize(request):
         x = int(meal['x'])
         y = int(meal['y'])
         food.append((x, y))
-        grid[x][y] = 'food'
+        row = y
+        col = x
+        grid[row][col] = 'food'
 
     #my snake maintenance
     health = int(request['you']['health'])
@@ -57,7 +59,9 @@ def initialize(request):
         x = int(part['x'])
         y = int(part['y'])
         body.append((x, y))
-        grid[x][y] = 'mysnake'
+        row = y
+        col = x
+        grid[row][col] = 'mysnake'
 
     my_snake = classes.Snake(body, health)
 
@@ -72,7 +76,9 @@ def initialize(request):
             x = int(part['x'])
             y = int(part['y'])
             enemy_body.append((x, y))
-            grid[x][y] = 'enemysnake'
+            row = y
+            col = x
+            grid[row][col] = 'enemysnake'
 
         enemy_snake = classes.Snake(enemy_body, enemy_health)
         enemy_snakes.append(enemy_snake)
@@ -203,45 +209,28 @@ def check_valid_moves(snake, board, influence):
     #check board components (enemy/own body) for valid moves
     tile_x, tile_y = snake.get_head()
 
-    for move in range(len(possible_moves)):
+    i = 0
+    while i < len(possible_moves):
 
-        if possible_moves[move] == 'up':
-            spacetaker = board.grid[int(tile_x)][int(tile_y - 1)]
+        spacetaker = ''
+        if possible_moves[i] == 'up':
+            spacetaker = board.get_grid_space(tile_x, tile_y - 1)
 
-            #not a valid tile
-            if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
-                possible_moves.remove('up')
-                move = move - 1
-                continue
+        elif possible_moves[i] == 'down':
+            spacetaker = board.get_grid_space(tile_x, tile_y + 1)
 
-        elif possible_moves[move] == 'down':
-            spacetaker = board.grid[tile_x][tile_y + 1]
+        elif possible_moves[i] == 'left':
+            spacetaker = board.get_grid_space(tile_x - 1, tile_y)
 
-            #not a valid tile
-            if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
-                possible_moves.remove('down')
-                move = move - 1
-                continue
+        elif possible_moves[i] == 'right':
+            spacetaker = board.get_grid_space(tile_x + 1, tile_y)
 
-        elif possible_moves[move] == 'left':
-            spacetaker = board.grid[tile_x - 1][tile_y]
-
-            #not a valid tile
-            if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
-                possible_moves.remove('left')
-                move = move - 1
-                continue
-
-        elif possible_moves[move] == 'right':
-            spacetaker = board.grid[tile_x + 1][tile_y]
-
-            #not a valid tile
-            if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
-                possible_moves.remove('right')
-                move = move - 1
-                continue
-
-
+        #not a valid tile
+        if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
+            possible_moves.pop(i)
+            i -= 1
+        i += 1
+        
     return possible_moves
 
 
@@ -353,7 +342,7 @@ def move():
 
     #JSON object maintenance
     my_snake, enemy_snakes, board = initialize(data)
-
+    print(board.grid)
 
     #----------CALCULATING BEST MOVE----------
     '''
