@@ -73,9 +73,17 @@ class Snake(object):
             Returns the direct distance (float) to the passed target object by using Pythagorus.
             Does not worry about direction or order of moves. Target object is a set of x & y coordinates.
 
-        dirs_towards(self, target):
-            Returns all valid directions (list of strings) towards approaching the passed target.
+        dir_towards(self, target):
+            Returns the lone valid direction (strings) that approaches the passed target. Used for 
+            A*, where an adjacent tile on the shortest path is passed to this function.
             Target object is a set of x & y coordinates.
+
+        dirs_towards(self, target):
+            Returns all valid directions (list of strings) that approach the passed target.
+            Target object is a set of x & y coordinates.
+
+        add_state(self, state):
+            Appends a state object (string) to the states list attribute.
         
     '''
     def __init__(self, body, health):
@@ -115,7 +123,20 @@ class Snake(object):
     def get_distance_to(self, target):
         x, y = self.get_head()
         target_x, target_y = target
-        return float(math.sqrt(  abs((x - target_x)^2) + abs((y - target_y)^2)  ))
+        return float(math.sqrt(  (x - target_x)**2 + (y - target_y)**2  ))
+
+    def dir_towards(self, target):
+        target_x, target_y = target
+        x, y = self.get_head()
+        if y > target_y:
+            return "up"
+        if y < target_y:
+            return "down"
+        if x > target_x:
+            return "left"
+        if x < target_x:
+            return "right"
+        return None
 
     def dirs_towards(self, target):
         target_x, target_y = target
@@ -185,3 +206,55 @@ class Influence(object):
 
     def inc_right(self, multiple):
         self.move_right += 1 * multiple
+
+
+class SearchNode():
+    '''
+    CLASS DESCRIPTION:
+        A node class used to perform an A* search algorithm for pathfinding.
+
+    ----------
+    ATTRIBUTES:
+
+        parent - the node's parent node. Helps determine final path.
+
+        position - the node's x & y coordinates (tuple)
+
+        f - total cost of the node; F = G + H
+
+        g - distance (in spaces/moves needed) between current node & end node
+
+        h - heuristic -> Estimated distance (hypotenuse) between current node & end node
+
+    ----------
+    METHODS:
+        __init__(self, parent=None, position=None):
+            Creates an instance of a SearchNode.
+
+        __eq__(self, other):
+            Modifies object comparison - two objects are equal if their positions are the same.
+
+        get_adjacent_spaces(self):
+            Returns a list of the x & y coordinates (tuple) of the 4 spaces adjacent to the node.
+            **This disregards if the adjacent spaces are off the board/out of bounds/occupied spaces.
+
+        get_parent(self):
+            Returns the node's parent node.
+    '''
+
+    def __init__(self, parent=None, position=None):
+        self.parent = parent
+        self.position = tuple(position)
+        self.f = 0
+        self.g = 0
+        self.h = 0
+
+    def __eq__(self, other):
+        return self.position == other.position
+
+    def get_adjacent_spaces(self):
+        x, y = self.position
+        return [(x, y - 1), (x, y + 1), (x - 1, y), (x + 1, y)]
+
+    def get_parent(self):
+        return self.parent

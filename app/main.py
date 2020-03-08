@@ -19,10 +19,11 @@ LOW_HEALTH = 30
 BOARD_EDGE_INFLUENCE = 10
 CLOSE_FOOD_INFLUENCE = 5
 
-CLOSE_FOOD_MAX_DIST = 5
+CLOSE_FOOD_MAX_DIST = 10
 
 
-
+#A* Search constants
+HEURISTIC_WEIGHT = 3
 
 #----------GAME FUNCTIONS-----------
 
@@ -32,7 +33,7 @@ initialize(): Function to maintain the JSON request data for usability.
 def initialize(request):
 
     #board maintenance
-    width = int(request["board"]["width"]) 
+    width = int(request['board']['width']) 
     height = int(request['board']['height']) 
     food = []
 
@@ -96,17 +97,17 @@ find_food: Calculates the coordinates of the closest food source to the snake's
 def find_food(snake, board):
 
     head_x, head_y = snake.get_head()
-    closest_food = board.food[0]
-    closest_dist = float(math.sqrt((board.width^2 + board.height^2)))
+    closest_food = tuple(board.food[0])
+    closest_dist = float(math.sqrt(board.width**2 + board.height**2))
 
     #loop through food items on the board & calc distance
     if len(board.food) > 0: 
         for meal in board.food:
-            hyp = snake.get_distance_to(meal)
+            hyp = snake.get_distance_to(tuple(meal))
 
             if hyp < closest_dist:
-                closest_dist = hyp
-                closest_food = meal
+                closest_dist = float(hyp)
+                closest_food = tuple(meal)
         
         return meal, closest_dist
     return False
@@ -147,7 +148,7 @@ def get_states(snake, board, influence):
 
 
 '''
-Function to check all the valid moves that a snake can make during a turn.
+Function to check all the valid moves (directly adjacent) that a snake can make during a turn.
     Moving into a wall/snake/own body are considered invalid.
 '''
 def check_valid_moves(snake, board, influence):
@@ -232,6 +233,134 @@ def check_valid_moves(snake, board, influence):
         i += 1
         
     return possible_moves
+
+
+'''
+Function to perform an A* search for a desired destination point (own tail, closest food ...).
+Heuristic:
+    F = Total cost of the node; F = G + H
+    G = Distance (in spaces/moves needed) between current node & end node
+    H = Heuristic -> Estimated distance (Pythagorus, under-est.) between current node & end node
+
+    Time complexity: O(b^d), with 'd'= shortest path to target, 'b'= number of successors per state (4)
+'''
+def a_star_search(grid, start, target):
+
+    #create lists to hold search nodes
+    open_set = []
+    closed_set = []
+    bound = len(grid) - 1
+
+    #create start, end nodes & push start node onto the open set
+    start_node = classes.SearchNode(None, start)
+    start_node.g = 1
+    end_node = classes.SearchNode(None, target)
+    open_set.append(start_node)
+
+    #search until open set of nodes is empty
+    loop_count = 0
+    while open_set:
+
+        loop_count += 1
+        print(loop_count)
+
+        #find current node = node with lowest f value
+        current_node = open_set[0]
+        current_index = 0
+
+        print('Newest open set: ', end='')
+        for i in open_set:
+            print(str(i.position) + ', ', end='')
+        print('')
+
+        for i, open_node in enumerate(open_set):
+
+            print('Open tile: ' + str(open_node.position) + ' -> open_node.f = ' + str(open_node.f) + '; current_node.f = ' + str(current_node.f))
+            if open_node.f <= current_node.f:
+                current_node = open_node
+                current_index = i
+
+        closed_set.append(open_set.pop(i))
+        print('New current node: ' + str(current_node.position))
+
+
+        #check if search target was found - end of search
+        if current_node == end_node:
+            print('FINISH')
+            
+            #return the path to the target in order (head to target, inclusive)
+            final_path = []
+            
+            while current_node != start_node:
+                final_path.insert(0, current_node.position)
+                current_node = current_node.parent
+
+            print(final_path)
+            return final_path
+
+
+        #-----TILES-----
+
+        #get (valid) adjacent tile coordinates to create children nodes
+        #*** assumes board is square here ***
+        adjacent_tiles = current_node.get_adjacent_spaces()
+        adjacent_tiles = [tile for tile in adjacent_tiles
+                            if not ((tile[0] < 0 or tile[0] > bound) or (tile[1] < 0 or tile[1] > bound))]
+
+        #check tiles for node creation
+        children = []
+        for tile in adjacent_tiles:
+            
+            #skip tile if it's taken
+            if grid[tile[0]][tile[1]] != 'empty' and grid[tile[0]][tile[1]] != 'food':
+                continue
+
+            #create new child node and append
+            child = classes.SearchNode(current_node, tile)
+            children.append(child)
+
+        #-----CHILDREN-----
+        
+        #check children for open nodes with lower f values thn child 
+        for child_node in children:
+
+            distant_child = False
+            closed_child = False
+
+            #check if child is already in closed set
+            for closed_node in closed_set:
+
+                if child_node == closed_node:
+                    print(str(child_node.position) + ' in closed set')
+                    closed_child = True
+                    break
+
+            if closed_child:
+                continue
+
+            #valid child - create f, g, h
+            child_node.g = current_node.g + 1
+            child_node.h = HEURISTIC_WEIGHT * (math.sqrt(  (child_node.position[0] - target[0])**2 + (child_node.position[1] - target[1])**2  ))
+            child_node.f = float(child_node.g + child_node.h)
+
+            #check if child is already in open set; skip if it's g-val is greater
+            for open_node in open_set:
+
+                if child_node == open_node and child_node.g > open_node.g:
+                    distant_child = True
+                    break
+
+            if distant_child:
+                continue
+
+            #add child to open list
+            open_set.append(child_node)
+            print('Append to open_set: ' + str(child_node.position))
+
+
+    #if no more searchable tiles & no target found, return None
+    print('No path found!')
+    return None
 
 
 
@@ -342,7 +471,6 @@ def move():
 
     #JSON object maintenance
     my_snake, enemy_snakes, board = initialize(data)
-    print(board.grid)
 
     #----------CALCULATING BEST MOVE----------
     '''
@@ -359,27 +487,29 @@ def move():
     #head_x, head_y = my_snake.get_head()
 
 
-
     #check snake's previous move/next body part - 2nd priority influence
     invalid_dir = ''
     if board.turn >= 3:
         invalid_dir = my_snake.get_invalid_dir()
 
-    #finding food
+    #finding food - Pythagorus for closest food find, A* Search to get the shortest path
     if board.turn >= 3:
         closest_food, closest_dist = find_food(my_snake, board)
 
         if closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST:
-            food_dirs = my_snake.dirs_towards(closest_food)
+            food_path = a_star_search(board.grid, my_snake.get_head(), closest_food)
 
-            if 'up' in food_dirs:
-                influence.inc_up(CLOSE_FOOD_INFLUENCE)
-            if 'down' in food_dirs:
-                influence.inc_down(CLOSE_FOOD_INFLUENCE)
-            if 'left' in food_dirs:
-                influence.inc_left(CLOSE_FOOD_INFLUENCE)
-            if 'right' in food_dirs:
-                influence.inc_right(CLOSE_FOOD_INFLUENCE)
+            if food_path:
+                first_move = my_snake.dir_towards(food_path[1])
+
+                if first_move == 'up':
+                    influence.inc_up(CLOSE_FOOD_INFLUENCE)
+                elif first_move == 'down':
+                    influence.inc_down(CLOSE_FOOD_INFLUENCE)
+                elif first_move == 'left':
+                    influence.inc_left(CLOSE_FOOD_INFLUENCE)
+                elif first_move == 'right':
+                    influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
 
     #----------MOVE DECISION-MAKING----------
