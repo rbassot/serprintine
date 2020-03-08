@@ -19,7 +19,7 @@ LOW_HEALTH = 30
 BOARD_EDGE_INFLUENCE = 10
 CLOSE_FOOD_INFLUENCE = 5
 
-CLOSE_FOOD_MAX_DIST = 10
+CLOSE_FOOD_MAX_DIST = 15
 
 
 #A* Search constants
@@ -537,7 +537,8 @@ def move():
     move_pairs = dict(zip(possible_moves, move_influences))
     move = max(move_pairs, key=move_pairs.get)
     
-    return move_response(move)
+    shout = "It's snack time!"
+    return move_response(move, shout)
 
 
 @bottle.post('/end')
