@@ -19,7 +19,7 @@ LOW_HEALTH = 30
 BOARD_EDGE_INFLUENCE = 10
 CLOSE_FOOD_INFLUENCE = 5
 
-CLOSE_FOOD_MAX_DIST = 15
+CLOSE_FOOD_MAX_DIST = 10
 
 
 #A* Search constants
@@ -96,21 +96,22 @@ find_food: Calculates the coordinates of the closest food source to the snake's
 '''
 def find_food(snake, board):
 
+    if len(board.food) <= 0:
+        return False
+
     head_x, head_y = snake.get_head()
     closest_food = tuple(board.food[0])
     closest_dist = float(math.sqrt(board.width**2 + board.height**2))
 
     #loop through food items on the board & calc distance
-    if len(board.food) > 0: 
-        for meal in board.food:
-            hyp = snake.get_distance_to(tuple(meal))
+    for meal in board.food:
+        hyp = snake.get_distance_to(tuple(meal))
 
-            if hyp < closest_dist:
-                closest_dist = float(hyp)
-                closest_food = tuple(meal)
+        if hyp < closest_dist:
+            closest_dist = float(hyp)
+            closest_food = tuple(meal)
         
-        return meal, closest_dist
-    return False
+    return meal, closest_dist
 
 
 '''
@@ -148,14 +149,14 @@ def get_states(snake, board, influence):
 
 
 '''
-Function to check all the valid moves (directly adjacent) that a snake can make during a turn.
+Function to check all the valid moves (directly adjacent) from a selected position on the board.
     Moving into a wall/snake/own body are considered invalid.
 '''
-def check_valid_moves(snake, board, influence):
+def check_valid_moves(snake, position, board, influence):
 
     #---------- 1 ----------
     #check board edges for valid moves
-    head_x, head_y = snake.get_head()
+    head_x, head_y = position
 
     if 'horiz_board_edge' in snake.states and 'vert_board_edge' not in snake.states:
         if 'left_board_edge' in snake.states:
@@ -184,9 +185,6 @@ def check_valid_moves(snake, board, influence):
             if board.turn >= 3:
                 influence.inc_up(BOARD_EDGE_INFLUENCE + 1)
 
-        else:    
-            possible_moves = ['left', 'right']
-
     elif 'horiz_board_edge' in snake.states and 'vert_board_edge' in snake.states:
 
         #top left corner
@@ -208,7 +206,7 @@ def check_valid_moves(snake, board, influence):
 
     #---------- 2 ----------
     #check board components (enemy/own body) for valid moves
-    tile_x, tile_y = snake.get_head()
+    tile_x, tile_y = position
 
     i = 0
     while i < len(possible_moves):
@@ -244,12 +242,12 @@ Heuristic:
 
     Time complexity: O(b^d), with 'd'= shortest path to target, 'b'= number of successors per state (4)
 '''
-def a_star_search(grid, start, target):
+def a_star_search(board, start, target):
 
     #create lists to hold search nodes
     open_set = []
     closed_set = []
-    bound = len(grid) - 1
+    bound = len(board.grid) - 1
 
     #create start, end nodes & push start node onto the open set
     start_node = classes.SearchNode(None, start)
@@ -258,35 +256,22 @@ def a_star_search(grid, start, target):
     open_set.append(start_node)
 
     #search until open set of nodes is empty
-    loop_count = 0
     while open_set:
-
-        loop_count += 1
-        print(loop_count)
 
         #find current node = node with lowest f value
         current_node = open_set[0]
         current_index = 0
 
-        print('Newest open set: ', end='')
-        for i in open_set:
-            print(str(i.position) + ', ', end='')
-        print('')
-
         for i, open_node in enumerate(open_set):
 
-            print('Open tile: ' + str(open_node.position) + ' -> open_node.f = ' + str(open_node.f) + '; current_node.f = ' + str(current_node.f))
             if open_node.f <= current_node.f:
                 current_node = open_node
                 current_index = i
 
         closed_set.append(open_set.pop(i))
-        print('New current node: ' + str(current_node.position))
-
 
         #check if search target was found - end of search
         if current_node == end_node:
-            print('FINISH')
             
             #return the path to the target in order (head to target, inclusive)
             final_path = []
@@ -312,7 +297,7 @@ def a_star_search(grid, start, target):
         for tile in adjacent_tiles:
             
             #skip tile if it's taken
-            if grid[tile[0]][tile[1]] != 'empty' and grid[tile[0]][tile[1]] != 'food':
+            if board.get_grid_space(tile[0], tile[1]) != 'empty' and board.get_grid_space(tile[0], tile[1]) != 'food':
                 continue
 
             #create new child node and append
@@ -331,7 +316,6 @@ def a_star_search(grid, start, target):
             for closed_node in closed_set:
 
                 if child_node == closed_node:
-                    print(str(child_node.position) + ' in closed set')
                     closed_child = True
                     break
 
@@ -355,7 +339,6 @@ def a_star_search(grid, start, target):
 
             #add child to open list
             open_set.append(child_node)
-            print('Append to open_set: ' + str(child_node.position))
 
 
     #if no more searchable tiles & no target found, return None
@@ -366,7 +349,7 @@ def a_star_search(grid, start, target):
 
 @bottle.route('/')
 def index():
-    return "<h1>Serprintine</h1>"
+    return "<h1>Serprintine*</h1>"
 
 
 @bottle.route('/static/<path:path>')
@@ -497,7 +480,7 @@ def move():
         closest_food, closest_dist = find_food(my_snake, board)
 
         if closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST:
-            food_path = a_star_search(board.grid, my_snake.get_head(), closest_food)
+            food_path = a_star_search(board, my_snake.get_head(), closest_food)
 
             if food_path:
                 first_move = my_snake.dir_towards(food_path[0])
@@ -512,10 +495,10 @@ def move():
                     influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
 
-    #----------MOVE DECISION-MAKING----------
+  #----------MOVE DECISION-MAKING----------
     #priority influence 1
     #ADDED - drive snake away from edge, towards middle
-    possible_moves = check_valid_moves(my_snake, board, influence)
+    possible_moves = check_valid_moves(my_snake, my_snake.get_head(), board, influence)
 
     #priority influence 2
     try:
