@@ -500,7 +500,7 @@ def move():
             food_path = a_star_search(board.grid, my_snake.get_head(), closest_food)
 
             if food_path:
-                first_move = my_snake.dir_towards(food_path[1])
+                first_move = my_snake.dir_towards(food_path[0])
 
                 if first_move == 'up':
                     influence.inc_up(CLOSE_FOOD_INFLUENCE)
