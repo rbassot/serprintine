@@ -15,11 +15,14 @@ from .api import ping_response, start_response, move_response, end_response
 
 #----------GAME CONSTANTS----------
 LOW_HEALTH = 30
+HUNGER_MULTIPLIER = 3
 
 BOARD_EDGE_INFLUENCE = 10
 CLOSE_FOOD_INFLUENCE = 5
+CHASE_TAIL_INFLUENCE = 5
 
-CLOSE_FOOD_MAX_DIST = 10
+CLOSE_FOOD_MAX_DIST = 7
+MAX_SEARCH_PATH_LEN = 10
 
 
 #A* Search constants
@@ -346,6 +349,10 @@ def a_star_search(board, start, target):
     return None
 
 
+'''
+Function to direct the snake towards the more open area in the case that only 2 moves are valid.
+'''
+
 
 @bottle.route('/')
 def index():
@@ -479,10 +486,12 @@ def move():
     if board.turn >= 3:
         closest_food, closest_dist = find_food(my_snake, board)
 
-        if closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST:
+        if ((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
+            (closest_food and my_snake.health <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)):
             food_path = a_star_search(board, my_snake.get_head(), closest_food)
 
-            if food_path:
+            if ((food_path and len(food_path) <= MAX_SEARCH_PATH_LEN) or
+                (food_path and my_snake.health <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
                 first_move = my_snake.dir_towards(food_path[0])
 
                 if first_move == 'up':
@@ -494,6 +503,20 @@ def move():
                 elif first_move == 'right':
                     influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
+        else:
+            chase_tail = a_star_search(board, my_snake.get_head(), my_snake.get_tail())
+
+            if chase_tail:
+                first_move = my_snake.dir_towards(food_path[0])
+
+                if first_move == 'up':
+                    influence.inc_up(CHASE_TAIL_INFLUENCE)
+                elif first_move == 'down':
+                    influence.inc_down(CHASE_TAIL_INFLUENCE)
+                elif first_move == 'left':
+                    influence.inc_left(CHASE_TAIL_INFLUENCE)
+                elif first_move == 'right':
+                    influence.inc_right(CHASE_TAIL_INFLUENCE)
 
   #----------MOVE DECISION-MAKING----------
     #priority influence 1
