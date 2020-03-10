@@ -21,7 +21,7 @@ BOARD_EDGE_INFLUENCE = 10
 CLOSE_FOOD_INFLUENCE = 5
 CHASE_TAIL_INFLUENCE = 5
 
-CLOSE_FOOD_MAX_DIST = 7
+CLOSE_FOOD_MAX_DIST = 8
 MAX_SEARCH_PATH_LEN = 10
 
 
@@ -166,13 +166,13 @@ def check_valid_moves(snake, position, board, influence):
             possible_moves = ['up', 'down', 'right']
 
             if board.turn >= 3:
-                influence.inc_right(BOARD_EDGE_INFLUENCE + 1)
+                influence.inc_right(BOARD_EDGE_INFLUENCE / 2)
 
         elif 'right_board_edge' in snake.states:
             possible_moves = ['up', 'down', 'left']
 
             if board.turn >= 3:
-                influence.inc_left(BOARD_EDGE_INFLUENCE + 1)
+                influence.inc_left(BOARD_EDGE_INFLUENCE / 2)
 
     elif 'vert_board_edge' in snake.states and 'horiz_board_edge' not in snake.states:
 
@@ -180,13 +180,13 @@ def check_valid_moves(snake, position, board, influence):
             possible_moves = ['down', 'left', 'right']
 
             if board.turn >= 3:
-                influence.inc_down(BOARD_EDGE_INFLUENCE + 1)
+                influence.inc_down(BOARD_EDGE_INFLUENCE / 2)
 
         elif 'bottom_board_edge' in snake.states:
             possible_moves = ['up', 'left', 'right']
 
             if board.turn >= 3:
-                influence.inc_up(BOARD_EDGE_INFLUENCE + 1)
+                influence.inc_up(BOARD_EDGE_INFLUENCE / 2)
 
     elif 'horiz_board_edge' in snake.states and 'vert_board_edge' in snake.states:
 
@@ -238,19 +238,29 @@ def check_valid_moves(snake, position, board, influence):
 
 '''
 Function to perform an A* search for a desired destination point (own tail, closest food ...).
-Heuristic:
+Returns the complete shortest path (list of x & y coordinate tuples) to the target, excluding the start position.
+
+Algorithm:
     F = Total cost of the node; F = G + H
     G = Distance (in spaces/moves needed) between current node & end node
     H = Heuristic -> Estimated distance (Pythagorus, under-est.) between current node & end node
 
-    Time complexity: O(b^d), with 'd'= shortest path to target, 'b'= number of successors per state (4)
+Time complexity: O(b^d), with 'd'= shortest path to target, 'b'= number of successors per state (4)
 '''
-def a_star_search(board, start, target):
+def a_star_search(board, snake, start, target):
 
     #create lists to hold search nodes
     open_set = []
     closed_set = []
     bound = len(board.grid) - 1
+    
+    #check for valid start position first
+    start_x, start_y = start
+    if start != snake.get_head():
+        if ((start_x < 0 or start_x > board.width - 1 or start_y < 0 or start_y > board.width - 1)
+                or (board.get_grid_space(start_x, start_y) != 'empty' and board.get_grid_space(start_x, start_y) != 'food')):
+            print('Invalid starting position!')
+            return None
 
     #create start, end nodes & push start node onto the open set
     start_node = classes.SearchNode(None, start)
@@ -350,8 +360,92 @@ def a_star_search(board, start, target):
 
 
 '''
+
+
 Function to direct the snake towards the more open area in the case that only 2 moves are valid.
 '''
+
+
+
+'''
+Function to check for enemy snakes 2 spaces away that could collide and cause death. Basically a further
+safety check 2 tiles in each direction.
+
+Returns True if a larger enemy snake head is adjacent, else returns False.
+'''
+def incoming_enemy_snake(board, snake, move, enemies):
+
+    #get direction that must not be checked, and analysis tile position
+    if move == 'up':
+        no_check = 'down'
+        x, y = snake.get_head()
+        tile_analyzed = (x, y - 1)
+
+    elif move == 'down':
+        no_check = 'up'
+        x, y = snake.get_head()
+        tile_analyzed = (x, y + 1)
+
+    elif move == 'left':
+        no_check = 'right'
+        x, y = snake.get_head()
+        tile_analyzed = (x - 1, y)
+
+    elif move == 'right':
+        no_check = 'left'
+        x, y = snake.get_head()
+        tile_analyzed = (x + 1, y)
+
+    #assure analysis tile is on the grid & a valid open space
+    tile_x, tile_y = tile_analyzed
+    if ((tile_x < 0 or tile_x > board.width - 1 or tile_y < 0 or tile_y > board.width - 1)
+            or (board.get_grid_space(tile_x, tile_y) != 'empty' and board.get_grid_space(tile_x, tile_y) != 'food')):
+        return True
+
+    #check adjacents to the analysis tile
+    adjacent_dirs = ['up', 'down', 'left', 'right']
+    adjacent_dirs.remove(no_check)
+
+    for adjacent in adjacent_dirs:
+
+        spacetaker = ''
+        enemy_found = False
+
+        #check for which adjacency
+        if adjacent == 'up':
+            spacetaker = board.get_grid_space(tile_x, tile_y - 1)
+            adjacent_check = (tile_x, tile_y - 1)
+        elif adjacent == 'down':
+            spacetaker = board.get_grid_space(tile_x, tile_y + 1)
+            adjacent_check = (tile_x, tile_y + 1)
+        elif adjacent == 'left':
+            spacetaker = board.get_grid_space(tile_x - 1, tile_y)
+            adjacent_check = (tile_x - 1, tile_y)
+        elif adjacent == 'right':
+            spacetaker = board.get_grid_space(tile_x + 1, tile_y)
+            adjacent_check = (tile_x + 1, tile_y)
+
+
+        if spacetaker == 'enemysnake' or spacetaker == 'mysnake':
+                
+            #find adjacent snake and check it's length
+            for enemy in enemies:
+                        
+                if enemy.get_head() == adjacent_check:
+                    enemy_length = len(enemy.body)
+                    enemy_found = True
+                    break
+
+        if enemy_found:
+
+            #compare lengths
+            if len(snake.body) <= enemy_length: 
+                return True
+
+    #if loop completes without finding larger snake, move is safe
+    return False
+
+
 
 
 @bottle.route('/')
@@ -473,49 +567,64 @@ def move():
     #get snake states before calculation
     get_states(my_snake, board, influence)
 
-    #get my_snake head coordinates
-    #head_x, head_y = my_snake.get_head()
-
-
     #check snake's previous move/next body part - 2nd priority influence
     invalid_dir = ''
     if board.turn >= 3:
         invalid_dir = my_snake.get_invalid_dir()
 
-    #finding food - Pythagorus for closest food find, A* Search to get the shortest path
-    if board.turn >= 3:
+
+    #----------SEARCH MAINTENANCE----------
+    #Strategy: A* implemented to search from head, then from 3 adjacent (potentially) valid tiles.
+    head_x, head_y = my_snake.get_head()
+
+    #setup search tiles
+    search_tiles = [(head_x, head_y), (head_x, head_y - 1), (head_x, head_y + 1), (head_x - 1, head_y), (head_x + 1, head_y)]
+    if invalid_dir == 'up':
+        search_tiles.pop(1)
+    elif invalid_dir == 'down':
+        search_tiles.pop(2)
+    elif invalid_dir == 'left':
+        search_tiles.pop(3)
+    elif invalid_dir == 'right':
+        search_tiles.pop(4)
+
+    for search_tile in search_tiles:
+
+        search_moves = []
         closest_food, closest_dist = find_food(my_snake, board)
 
         if ((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
-            (closest_food and my_snake.health <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)):
-            food_path = a_star_search(board, my_snake.get_head(), closest_food)
+                (closest_food and my_snake.health <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)):
+
+            food_path = a_star_search(board, my_snake, search_tile, closest_food)
 
             if ((food_path and len(food_path) <= MAX_SEARCH_PATH_LEN) or
-                (food_path and my_snake.health <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
-                first_move = my_snake.dir_towards(food_path[0])
+                    (food_path and my_snake.health <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
 
-                if first_move == 'up':
+                search_moves = my_snake.dirs_towards(food_path[0])
+
+                if 'up' in search_moves:
                     influence.inc_up(CLOSE_FOOD_INFLUENCE)
-                elif first_move == 'down':
+                if 'down' in search_moves:
                     influence.inc_down(CLOSE_FOOD_INFLUENCE)
-                elif first_move == 'left':
+                if 'left' in search_moves:
                     influence.inc_left(CLOSE_FOOD_INFLUENCE)
-                elif first_move == 'right':
+                if 'right' in search_moves:
                     influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
         else:
-            chase_tail = a_star_search(board, my_snake.get_head(), my_snake.get_tail())
+            chase_tail = a_star_search(board, my_snake, search_tile, my_snake.get_tail())
 
             if chase_tail:
-                first_move = my_snake.dir_towards(food_path[0])
+                search_moves = my_snake.dirs_towards(chase_tail[0])
 
-                if first_move == 'up':
+                if 'up' in search_moves:
                     influence.inc_up(CHASE_TAIL_INFLUENCE)
-                elif first_move == 'down':
+                if 'down' in search_moves:
                     influence.inc_down(CHASE_TAIL_INFLUENCE)
-                elif first_move == 'left':
+                if 'left' in search_moves:
                     influence.inc_left(CHASE_TAIL_INFLUENCE)
-                elif first_move == 'right':
+                if 'right' in search_moves:
                     influence.inc_right(CHASE_TAIL_INFLUENCE)
 
   #----------MOVE DECISION-MAKING----------
@@ -523,6 +632,9 @@ def move():
     #ADDED - drive snake away from edge, towards middle
     possible_moves = check_valid_moves(my_snake, my_snake.get_head(), board, influence)
 
+    #check further for any larger, incoming snakes that would result in a death collision
+    possible_moves = [move for move in possible_moves if not incoming_enemy_snake(board, my_snake, move, enemy_snakes)]
+        
     #priority influence 2
     try:
         possible_moves.remove(invalid_dir)
