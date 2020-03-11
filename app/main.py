@@ -167,21 +167,21 @@ def check_valid_moves(snake, position, board, influence):
     if 'horiz_board_edge' in snake.states and 'vert_board_edge' not in snake.states:
         if 'left_board_edge' in snake.states:
             possible_moves = ['up', 'down', 'right']
-            influence.inc_right(BOARD_EDGE_INFLUENCE)
+            influence.inc_right(BOARD_EDGE_INFLUENCE + 1)
 
         elif 'right_board_edge' in snake.states:
             possible_moves = ['up', 'down', 'left']
-            influence.inc_left(BOARD_EDGE_INFLUENCE)
+            influence.inc_left(BOARD_EDGE_INFLUENCE + 1)
 
     elif 'vert_board_edge' in snake.states and 'horiz_board_edge' not in snake.states:
 
         if 'top_board_edge' in snake.states:
             possible_moves = ['down', 'left', 'right']
-            influence.inc_down(BOARD_EDGE_INFLUENCE)
+            influence.inc_down(BOARD_EDGE_INFLUENCE + 1)
 
         elif 'bottom_board_edge' in snake.states:
             possible_moves = ['up', 'left', 'right']
-            influence.inc_up(BOARD_EDGE_INFLUENCE)
+            influence.inc_up(BOARD_EDGE_INFLUENCE + 1)
 
     elif 'horiz_board_edge' in snake.states and 'vert_board_edge' in snake.states:
 
@@ -558,9 +558,6 @@ def move():
     #data = bottle.request.json
     data = json.load(bottle.request.body)
 
-    #print("TEST\n")
-    #print(json.dumps(data))
-
     #JSON object maintenance
     my_snake, enemy_snakes, board = initialize(data)
 
@@ -664,6 +661,8 @@ def move():
     move = max(move_pairs, key=move_pairs.get)
     
     shout = "It's snack time!"
+    print(move_pairs)
+    print('Selected move is:' + move)
     return move_response(move, shout)
 
 
