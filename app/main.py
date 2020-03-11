@@ -155,40 +155,33 @@ def get_states(snake, board, influence):
 
 '''
 Function to check all the valid moves (directly adjacent) from a selected position on the board.
-    Moving into a wall/snake/own body are considered invalid.
+    Moving into a wall/snake/own body are considered invalid. Also adjusts influence to drive the
+    snake away from an edge of the board.
 '''
 def check_valid_moves(snake, position, board, influence):
 
     #---------- 1 ----------
-    #check board edges for valid moves
+    #check board edges for valid moves, and drive the snake away from the edge
     head_x, head_y = position
 
     if 'horiz_board_edge' in snake.states and 'vert_board_edge' not in snake.states:
         if 'left_board_edge' in snake.states:
             possible_moves = ['up', 'down', 'right']
-
-            if board.turn >= 3:
-                influence.inc_right(BOARD_EDGE_INFLUENCE / 2)
+            influence.inc_right(BOARD_EDGE_INFLUENCE)
 
         elif 'right_board_edge' in snake.states:
             possible_moves = ['up', 'down', 'left']
-
-            if board.turn >= 3:
-                influence.inc_left(BOARD_EDGE_INFLUENCE / 2)
+            influence.inc_left(BOARD_EDGE_INFLUENCE)
 
     elif 'vert_board_edge' in snake.states and 'horiz_board_edge' not in snake.states:
 
         if 'top_board_edge' in snake.states:
             possible_moves = ['down', 'left', 'right']
-
-            if board.turn >= 3:
-                influence.inc_down(BOARD_EDGE_INFLUENCE / 2)
+            influence.inc_down(BOARD_EDGE_INFLUENCE)
 
         elif 'bottom_board_edge' in snake.states:
             possible_moves = ['up', 'left', 'right']
-
-            if board.turn >= 3:
-                influence.inc_up(BOARD_EDGE_INFLUENCE / 2)
+            influence.inc_up(BOARD_EDGE_INFLUENCE)
 
     elif 'horiz_board_edge' in snake.states and 'vert_board_edge' in snake.states:
 
