@@ -196,16 +196,16 @@ class Influence(object):
         self.move_right = 0
 
     def inc_up(self, multiple):
-        self.move_up += 1 * multiple
+        self.move_up += (1 * multiple)
 
     def inc_down(self, multiple):
-        self.move_down += 1 * multiple
+        self.move_down += (1 * multiple)
 
     def inc_left(self, multiple):
-        self.move_left += 1 * multiple
+        self.move_left += (1 * multiple)
 
     def inc_right(self, multiple):
-        self.move_right += 1 * multiple
+        self.move_right += (1 * multiple)
 
 
 class SearchNode():

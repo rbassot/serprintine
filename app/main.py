@@ -18,8 +18,10 @@ LOW_HEALTH = 30
 HUNGER_MULTIPLIER = 3
 
 BOARD_EDGE_INFLUENCE = 10
-CLOSE_FOOD_INFLUENCE = 5
-CHASE_TAIL_INFLUENCE = 5
+CLOSE_FOOD_INFLUENCE = 6
+CHASE_TAIL_INFLUENCE = 6
+
+FLEE_ENEMIES_INFLUENCE = 5
 
 CLOSE_FOOD_MAX_DIST = 8
 MAX_SEARCH_PATH_LEN = 10
@@ -373,7 +375,7 @@ safety check 2 tiles in each direction.
 
 Returns True if a larger enemy snake head is adjacent, else returns False.
 '''
-def incoming_enemy_snake(board, snake, move, enemies):
+def incoming_enemy_snake(board, snake, move, enemies, influence):
 
     #get direction that must not be checked, and analysis tile position
     if move == 'up':
@@ -428,13 +430,26 @@ def incoming_enemy_snake(board, snake, move, enemies):
 
         if spacetaker == 'enemysnake' or spacetaker == 'mysnake':
                 
-            #find adjacent snake and check it's length
+            #find adjacent snake and check its length
             for enemy in enemies:
                         
                 if enemy.get_head() == adjacent_check:
                     enemy_length = len(enemy.body)
                     enemy_found = True
                     break
+
+                #if not a head collision, check for enemy body and reduce influence for that immediate move
+                for part in enemy.body:
+
+                    if part == adjacent_check:
+                        if move == 'up':
+                            influence.inc_up(-FLEE_ENEMIES_INFLUENCE)
+                        elif move == 'down':
+                            influence.inc_down(-FLEE_ENEMIES_INFLUENCE)
+                        elif move == 'left':
+                            influence.inc_left(-FLEE_ENEMIES_INFLUENCE)
+                        elif move == 'right':
+                            influence.inc_right(-FLEE_ENEMIES_INFLUENCE)
 
         if enemy_found:
 
@@ -627,15 +642,15 @@ def move():
                 if 'right' in search_moves:
                     influence.inc_right(CHASE_TAIL_INFLUENCE)
 
-  #----------MOVE DECISION-MAKING----------
+    #----------MOVE DECISION-MAKING----------
     #priority influence 1
     #ADDED - drive snake away from edge, towards middle
     possible_moves = check_valid_moves(my_snake, my_snake.get_head(), board, influence)
 
     #check further for any larger, incoming snakes that would result in a death collision
-    possible_moves = [move for move in possible_moves if not incoming_enemy_snake(board, my_snake, move, enemy_snakes)]
-        
-    #priority influence 2
+    possible_moves = [move for move in possible_moves if not incoming_enemy_snake(board, my_snake, move, enemy_snakes, influence)]
+
+    #priority influence 2 - remove invalid direction
     try:
         possible_moves.remove(invalid_dir)
     except ValueError:
