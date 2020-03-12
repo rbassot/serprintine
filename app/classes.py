@@ -19,6 +19,9 @@ class Board(object):
 
         get_grid_space(self, x, y):
             Returns the value (string) occupying the tile at the x & y coordinates of the grid.
+
+        set_grid_space(self, x, y, value):
+            Sets the value (string) that will occupy the tile at the x & y coordinates of the grid.
     '''
     
     def __init__(self, width, height, food, grid, turn):
@@ -37,6 +40,16 @@ class Board(object):
         except IndexError:
             return ''
         return grid_space
+
+    def set_grid_space(self, x, y, value):
+        try:
+            row = y
+            col = x
+            self.grid[row][col] = value
+
+        except IndexError or ValueError:
+            return
+        return
 
 
 class Snake(object):

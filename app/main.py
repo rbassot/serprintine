@@ -234,6 +234,7 @@ def check_valid_moves(snake, position, board, influence):
 '''
 Function to perform an A* search for a desired destination point (own tail, closest food ...).
 Returns the complete shortest path (list of x & y coordinate tuples) to the target, excluding the start position.
+Moves take in to account if snake tails will have moved away by the time that space is reached.
 
 Algorithm:
     F = Total cost of the node; F = G + H
@@ -242,18 +243,21 @@ Algorithm:
 
 Time complexity: O(b^d), with 'd'= shortest path to target, 'b'= number of successors per state (4)
 '''
-def a_star_search(board, snake, start, target):
+def a_star_search(board, snake, enemies, start, target):
 
     #create lists to hold search nodes
     open_set = []
     closed_set = []
-    bound = len(board.grid) - 1
+
+    #create a temp board for future tail prediction - maintains the board object
+    temp_board = board.copy()
+    bound = len(temp_board.grid) - 1
     
     #check for valid start position first
     start_x, start_y = start
     if start != snake.get_head():
-        if ((start_x < 0 or start_x > board.width - 1 or start_y < 0 or start_y > board.width - 1)
-                or (board.get_grid_space(start_x, start_y) != 'empty' and board.get_grid_space(start_x, start_y) != 'food')):
+        if ((start_x < 0 or start_x > temp_board.width - 1 or start_y < 0 or start_y > temp_board.width - 1)
+                or (temp_board.get_grid_space(start_x, start_y) != 'empty' and temp_board.get_grid_space(start_x, start_y) != 'food')):
             print('Invalid starting position!')
             return None
 
@@ -264,6 +268,7 @@ def a_star_search(board, snake, start, target):
     open_set.append(start_node)
 
     #search until open set of nodes is empty
+    first_loop = True
     while open_set:
 
         #find current node = node with lowest f value
@@ -293,6 +298,11 @@ def a_star_search(board, snake, start, target):
 
 
         #-----TILES-----
+        #adjust board per turn
+        if not first_loop:
+            adjust_future_tails(temp_board, snake, enemies)
+
+        first_loop = False
 
         #get (valid) adjacent tile coordinates to create children nodes
         #*** assumes board is square here ***
@@ -305,7 +315,7 @@ def a_star_search(board, snake, start, target):
         for tile in adjacent_tiles:
             
             #skip tile if it's taken
-            if board.get_grid_space(tile[0], tile[1]) != 'empty' and board.get_grid_space(tile[0], tile[1]) != 'food':
+            if temp_board.get_grid_space(tile[0], tile[1]) != 'empty' and temp_board.get_grid_space(tile[0], tile[1]) != 'food':
                 continue
 
             #create new child node and append
@@ -314,7 +324,7 @@ def a_star_search(board, snake, start, target):
 
         #-----CHILDREN-----
         
-        #check children for open nodes with lower f values thn child 
+        #check children for open nodes with lower f values than child 
         for child_node in children:
 
             distant_child = False
@@ -453,6 +463,33 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
     #if loop completes without finding larger snake, move is safe
     return False
 
+
+'''
+Function to adjust the tails of all snakes on the board for the next turn.
+Allows the discovery of future open squares that open once a turn passes.
+'''
+def adjust_future_tails(board, snake, enemies):
+
+    #replace all tails on the board with 'empty', and adjust all Snake objects
+    for enemy in enemies:
+
+        try:
+            x, y = enemy.get_tail()
+            enemy.body.pop()
+        except IndexError:
+            continue
+
+        board.set_grid_space(x, y, 'empty')
+
+    #replace my own tail
+    try:
+        x, y = snake.get_tail()
+        snake.body.pop()
+    except IndexError:
+        return
+
+    board.set_grid_space(x, y, 'empty')
+    return
 
 
 
@@ -601,7 +638,7 @@ def move():
         if ((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
                 (closest_food and my_snake.health <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)):
 
-            food_path = a_star_search(board, my_snake, search_tile, closest_food)
+            food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
 
             if ((food_path and len(food_path) <= MAX_SEARCH_PATH_LEN) or
                     (food_path and my_snake.health <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
@@ -618,7 +655,7 @@ def move():
                     influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
         else:
-            chase_tail = a_star_search(board, my_snake, search_tile, my_snake.get_tail())
+            chase_tail = a_star_search(board, my_snake, search_tile, enemy_snakes, my_snake.get_tail())
 
             if chase_tail:
                 search_moves = my_snake.dirs_towards(chase_tail[0])
