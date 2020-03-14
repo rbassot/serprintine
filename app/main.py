@@ -642,10 +642,7 @@ def move():
     get_states(my_snake, board, influence)
 
     #check snake's previous move/next body part - 2nd priority influence
-    invalid_dir = ''
-    if board.turn >= 3:
-        invalid_dir = my_snake.get_invalid_dir()
-
+    invalid_dir = my_snake.get_invalid_dir()
 
     #----------SEARCH MAINTENANCE----------
     #Strategy: A* implemented to search from head, then from 3 adjacent (potentially) valid tiles.
