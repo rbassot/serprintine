@@ -5,6 +5,7 @@ import sys
 import os
 import random
 import math
+from copy import deepcopy
 import bottle
 
 #custom game class module
@@ -249,13 +250,19 @@ def a_star_search(board, snake, enemies, start, target):
     open_set = []
     closed_set = []
 
-    #create a temp board for future tail prediction - maintains the board object
-    temp_board = board.copy()
+    #create a new temp Board/enemies/self for future tail prediction - maintains the original Board object
+    temp_board = deepcopy(board)
+    temp_enemies = []
+    for enemy in enemies:
+        temp_enemy = deepcopy(enemy)
+        temp_enemies.append(temp_enemy)
+
+    temp_snake = deepcopy(snake)
     bound = len(temp_board.grid) - 1
     
     #check for valid start position first
     start_x, start_y = start
-    if start != snake.get_head():
+    if start != temp_snake.get_head():
         if ((start_x < 0 or start_x > temp_board.width - 1 or start_y < 0 or start_y > temp_board.width - 1)
                 or (temp_board.get_grid_space(start_x, start_y) != 'empty' and temp_board.get_grid_space(start_x, start_y) != 'food')):
             print('Invalid starting position!')
@@ -268,7 +275,6 @@ def a_star_search(board, snake, enemies, start, target):
     open_set.append(start_node)
 
     #search until open set of nodes is empty
-    first_loop = True
     while open_set:
 
         #find current node = node with lowest f value
@@ -298,11 +304,8 @@ def a_star_search(board, snake, enemies, start, target):
 
 
         #-----TILES-----
-        #adjust board per turn
-        if not first_loop:
-            adjust_future_tails(temp_board, snake, enemies)
-
-        first_loop = False
+        #adjust board for every turn
+        adjust_future_tails(temp_board, temp_snake, temp_enemies)
 
         #get (valid) adjacent tile coordinates to create children nodes
         #*** assumes board is square here ***
@@ -473,22 +476,21 @@ def adjust_future_tails(board, snake, enemies):
     #replace all tails on the board with 'empty', and adjust all Snake objects
     for enemy in enemies:
 
-        try:
-            x, y = enemy.get_tail()
-            enemy.body.pop()
-        except IndexError:
+        if not enemy.get_tail():
             continue
-
+    
+        x, y = enemy.get_tail()
+        enemy.body.pop()
         board.set_grid_space(x, y, 'empty')
 
     #replace my own tail
-    try:
-        x, y = snake.get_tail()
-        snake.body.pop()
-    except IndexError:
+    if not snake.get_tail():
         return
 
+    x, y = snake.get_tail()
+    snake.body.pop()
     board.set_grid_space(x, y, 'empty')
+
     return
 
 
@@ -643,20 +645,21 @@ def move():
             if ((food_path and len(food_path) <= MAX_SEARCH_PATH_LEN) or
                     (food_path and my_snake.health <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
 
-                search_moves = my_snake.dirs_towards(food_path[0])
+                if my_snake.get_head():
+                    search_moves = my_snake.dirs_towards(food_path[0])
 
-                if 'up' in search_moves:
-                    influence.inc_up(CLOSE_FOOD_INFLUENCE)
-                if 'down' in search_moves:
-                    influence.inc_down(CLOSE_FOOD_INFLUENCE)
-                if 'left' in search_moves:
-                    influence.inc_left(CLOSE_FOOD_INFLUENCE)
-                if 'right' in search_moves:
-                    influence.inc_right(CLOSE_FOOD_INFLUENCE)
+                    if 'up' in search_moves:
+                        influence.inc_up(CLOSE_FOOD_INFLUENCE)
+                    if 'down' in search_moves:
+                        influence.inc_down(CLOSE_FOOD_INFLUENCE)
+                    if 'left' in search_moves:
+                        influence.inc_left(CLOSE_FOOD_INFLUENCE)
+                    if 'right' in search_moves:
+                        influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
         else:
             chase_tail = a_star_search(board, my_snake, search_tile, enemy_snakes, my_snake.get_tail())
-
+            
             if chase_tail:
                 search_moves = my_snake.dirs_towards(chase_tail[0])
 

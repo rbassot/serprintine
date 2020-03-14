@@ -31,6 +31,21 @@ class Board(object):
         self.grid = grid
         self.turn = turn
 
+    def get_height(self):
+        return self.height
+
+    def get_width(self):
+        return self.width
+
+    def get_food(self):
+        return self.food
+
+    def get_grid(self):
+        return self.grid
+
+    def get_turn(self):
+        return self.turn
+
     def get_grid_space(self, x, y):
         try:
             row = y
@@ -106,10 +121,24 @@ class Snake(object):
         self.states = []
 
     def get_head(self):
-        return tuple(self.body[0])
+        try:
+            head = tuple(self.body[0])
+        except IndexError:
+            return None
+        return head
 
     def get_tail(self):
-        return tuple(self.body[len(self.body) - 1])
+        try:
+            tail = tuple(self.body[len(self.body) - 1])
+        except IndexError:
+            return None
+        return tail
+
+    def get_body(self):
+        return self.body
+
+    def get_health(self):
+        return self.health
 
     def get_length(self):
         return len(self.body)
