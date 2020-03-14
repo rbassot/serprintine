@@ -26,6 +26,7 @@ FLEE_ENEMIES_INFLUENCE = 5
 
 CLOSE_FOOD_MAX_DIST = 10
 MAX_SEARCH_PATH_LEN = 12
+HEAD_SEARCH_MULT = 1.5
 
 
 #A* Search constants
@@ -340,7 +341,6 @@ def a_star_search(board, snake, enemies, start, target):
             children.append(child)
 
         #-----CHILDREN-----
-        
         #check children for open nodes with lower f values than child 
         for child_node in children:
 
@@ -649,6 +649,7 @@ def move():
 
     #----------SEARCH MAINTENANCE----------
     #Strategy: A* implemented to search from head, then from 3 adjacent (potentially) valid tiles.
+    #Search performed from the head is weighted the most with a multiplier.
     head_x, head_y = my_snake.get_head()
 
     #setup search tiles
@@ -662,6 +663,7 @@ def move():
     elif invalid_dir == 'right':
         search_tiles.pop(4)
 
+    head_search = True
     for search_tile in search_tiles:
 
         search_moves = []
@@ -675,7 +677,20 @@ def move():
             if ((food_path and len(food_path) <= MAX_SEARCH_PATH_LEN) or
                     (food_path and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
 
-                if my_snake.get_head():
+                if head_search:
+                    head_search = False
+                    search_move = my_snake.dir_towards(food_path[0])
+
+                    if search_move == 'up':
+                        influence.inc_up(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
+                    elif search_move == 'down':
+                        influence.inc_down(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
+                    elif search_move == 'left':
+                        influence.inc_left(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
+                    elif search_move == 'right':
+                        influence.inc_right(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
+
+                else:
                     search_moves = my_snake.dirs_towards(food_path[0])
 
                     if 'up' in search_moves:
@@ -688,19 +703,34 @@ def move():
                         influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
         else:
-            chase_tail = a_star_search(board, my_snake, search_tile, enemy_snakes, my_snake.get_tail())
+            chase_tail = a_star_search(board, my_snake, enemy_snakes, search_tile, my_snake.get_tail())
 
             if chase_tail:
-                search_moves = my_snake.dirs_towards(chase_tail[0])
 
-                if 'up' in search_moves:
-                    influence.inc_up(CHASE_TAIL_INFLUENCE)
-                if 'down' in search_moves:
-                    influence.inc_down(CHASE_TAIL_INFLUENCE)
-                if 'left' in search_moves:
-                    influence.inc_left(CHASE_TAIL_INFLUENCE)
-                if 'right' in search_moves:
-                    influence.inc_right(CHASE_TAIL_INFLUENCE)
+                if head_search:
+                    head_search = False
+                    search_move = my_snake.dir_towards(food_path[0])
+
+                    if search_move == 'up':
+                        influence.inc_up(CHASE_TAIL_INFLUENCE * HEAD_SEARCH_MULT)
+                    elif search_move == 'down':
+                        influence.inc_down(CHASE_TAIL_INFLUENCE * HEAD_SEARCH_MULT)
+                    elif search_move == 'left':
+                        influence.inc_left(CHASE_TAIL_INFLUENCE * HEAD_SEARCH_MULT)
+                    elif search_move == 'right':
+                        influence.inc_right(CHASE_TAIL_INFLUENCE * HEAD_SEARCH_MULT)
+
+                else:
+                    search_moves = my_snake.dirs_towards(chase_tail[0])
+
+                    if 'up' in search_moves:
+                        influence.inc_up(CHASE_TAIL_INFLUENCE)
+                    if 'down' in search_moves:
+                        influence.inc_down(CHASE_TAIL_INFLUENCE)
+                    if 'left' in search_moves:
+                        influence.inc_left(CHASE_TAIL_INFLUENCE)
+                    if 'right' in search_moves:
+                        influence.inc_right(CHASE_TAIL_INFLUENCE)
 
     #----------MOVE DECISION-MAKING----------
     #priority influence 1
@@ -732,7 +762,7 @@ def move():
     
     shout = "It's snack time!"
     print(move_pairs)
-    print('Selected move is:' + move)
+    print('Selected move: ' + move)
     return move_response(move, shout)
 
 

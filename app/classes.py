@@ -215,13 +215,13 @@ class Influence(object):
 
     ----------
     ATTRIBUTES:
-        move_up - total of influences towards moving up (-y)
+        move_up - total summation (float) of influences towards moving up (-y)
 
-        move_down - total of influences towards moving down (+y)
+        move_down - total summation (float) of influences towards moving down (+y)
 
-        move_left - total of influences towards moving left (-x)
+        move_left - total summation (float) of influences towards moving left (-x)
 
-        move_right - total of influences towards moving right (+x)
+        move_right - total summation (float) of influences towards moving right (+x)
 
     ----------
     METHODS:
@@ -241,10 +241,10 @@ class Influence(object):
             Increments the influence towards moving right by the passed amount.
     '''
     def __init__(self):
-        self.move_up = 0
-        self.move_down = 0
-        self.move_left = 0
-        self.move_right = 0
+        self.move_up = 0.0
+        self.move_down = 0.0
+        self.move_left = 0.0
+        self.move_right = 0.0
 
     def inc_up(self, multiple):
         self.move_up += (1 * multiple)
