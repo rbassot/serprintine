@@ -16,7 +16,7 @@
         {
           "id": "snake-id-string",
           "name": "Sneky Snek",
-          "health": 90,
+          "health": 100,
           "body": [
             {
               "x": 3,

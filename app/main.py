@@ -16,6 +16,7 @@ from .api import ping_response, start_response, move_response, end_response
 
 #----------GAME CONSTANTS----------
 LOW_HEALTH = 30
+MAX_HEALTH = 100
 HUNGER_MULTIPLIER = 3
 
 BOARD_EDGE_INFLUENCE = 10
@@ -23,6 +24,7 @@ CLOSE_FOOD_INFLUENCE = 6
 CHASE_TAIL_INFLUENCE = 6
 
 FLEE_ENEMIES_INFLUENCE = 5
+ENEMY_WILL_GROW = 10
 
 CLOSE_FOOD_MAX_DIST = 6
 MAX_SEARCH_PATH_LEN = 8
@@ -513,10 +515,13 @@ Allows the discovery of future open squares that open once a turn passes.
 '''
 def adjust_future_tails(board, snake, enemies):
 
-    #replace all tails on the board with 'empty', and adjust all Snake objects
+    #replace all tails on the board with 'empty' if the snake hasn't just eaten, and adjust all snakes
     for enemy in enemies:
 
         if not enemy.get_tail():
+            continue
+
+        if enemy.get_health() == MAX_HEALTH:
             continue
     
         x, y = enemy.get_tail()
