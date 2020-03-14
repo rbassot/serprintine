@@ -664,7 +664,11 @@ def move():
     for search_tile in search_tiles:
 
         search_moves = []
-        closest_food, closest_dist = find_food(my_snake, board)
+        try:
+            closest_food, closest_dist = find_food(my_snake, board)
+        except TypeError:
+            closest_food = False
+            closest_dist = None
 
         if ((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
                 (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)):
@@ -706,7 +710,7 @@ def move():
 
                 if head_search:
                     head_search = False
-                    search_move = my_snake.dir_towards(food_path[0])
+                    search_move = my_snake.dir_towards(chase_tail[0])
 
                     if search_move == 'up':
                         influence.inc_up(CHASE_TAIL_INFLUENCE * HEAD_SEARCH_MULT)
