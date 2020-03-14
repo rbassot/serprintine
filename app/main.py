@@ -738,10 +738,8 @@ def move():
     possible_moves = [move for move in possible_moves if not incoming_enemy_snake(board, my_snake, move, enemy_snakes, influence)]
 
     #priority influence 2 - remove invalid direction
-    try:
+    if invalid_dir:
         possible_moves.remove(invalid_dir)
-    except ValueError:
-        pass
     
     #secondary influences
     move_influences = []

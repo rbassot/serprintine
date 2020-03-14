@@ -158,7 +158,7 @@ class Snake(object):
             body_x, body_y = self.body[1]
 
         except IndexError:
-            return ""
+            return None
 
         if x == body_x and y < body_y:
             return "down"
