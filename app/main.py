@@ -24,8 +24,8 @@ CHASE_TAIL_INFLUENCE = 6
 
 FLEE_ENEMIES_INFLUENCE = 5
 
-CLOSE_FOOD_MAX_DIST = 10
-MAX_SEARCH_PATH_LEN = 12
+CLOSE_FOOD_MAX_DIST = 6
+MAX_SEARCH_PATH_LEN = 8
 HEAD_SEARCH_MULT = 1.5
 
 
@@ -739,7 +739,10 @@ def move():
 
     #priority influence 2 - remove invalid direction
     if invalid_dir:
-        possible_moves.remove(invalid_dir)
+        try:
+            possible_moves.remove(invalid_dir)
+        except ValueError:
+            pass
     
     #secondary influences
     move_influences = []
