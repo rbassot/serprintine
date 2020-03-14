@@ -121,8 +121,8 @@ def find_food(snake, board):
 
 
 '''
-Function to check the possible states of a snake in relation to the game board.
-    States are strings appended to a snake's .states[] attribute.
+Function to check the current states of a snake in relation to the game board.
+    States are strings appended to a snake's .states attribute (list).
 '''
 def get_states(snake, board, influence):
 
@@ -159,44 +159,56 @@ Function to check all the valid moves (directly adjacent) from a selected positi
     Moving into a wall/snake/own body are considered invalid. Also adjusts influence to drive the
     snake away from an edge of the board.
 '''
-def check_valid_moves(snake, position, board, influence):
+def check_valid_moves(snake, position, board, enemies, influence):
+
+    #create a new temp Board/enemies/self for future tail prediction - maintains the original Board object
+    temp_board = deepcopy(board)
+    temp_enemies = []
+    for enemy in enemies:
+        temp_enemy = deepcopy(enemy)
+        temp_enemies.append(temp_enemy)
+
+    temp_snake = deepcopy(snake)
+
+    #adjust board for next turn
+    adjust_future_tails(temp_board, temp_snake, temp_enemies)
 
     #---------- 1 ----------
     #check board edges for valid moves, and drive the snake away from the edge
     head_x, head_y = position
 
-    if 'horiz_board_edge' in snake.states and 'vert_board_edge' not in snake.states:
-        if 'left_board_edge' in snake.states:
+    if 'horiz_board_edge' in temp_snake.states and 'vert_board_edge' not in temp_snake.states:
+        if 'left_board_edge' in temp_snake.states:
             possible_moves = ['up', 'down', 'right']
             influence.inc_right(BOARD_EDGE_INFLUENCE + 1)
 
-        elif 'right_board_edge' in snake.states:
+        elif 'right_board_edge' in temp_snake.states:
             possible_moves = ['up', 'down', 'left']
             influence.inc_left(BOARD_EDGE_INFLUENCE + 1)
 
-    elif 'vert_board_edge' in snake.states and 'horiz_board_edge' not in snake.states:
+    elif 'vert_board_edge' in temp_snake.states and 'horiz_board_edge' not in temp_snake.states:
 
-        if 'top_board_edge' in snake.states:
+        if 'top_board_edge' in temp_snake.states:
             possible_moves = ['down', 'left', 'right']
             influence.inc_down(BOARD_EDGE_INFLUENCE + 1)
 
-        elif 'bottom_board_edge' in snake.states:
+        elif 'bottom_board_edge' in temp_snake.states:
             possible_moves = ['up', 'left', 'right']
             influence.inc_up(BOARD_EDGE_INFLUENCE + 1)
 
-    elif 'horiz_board_edge' in snake.states and 'vert_board_edge' in snake.states:
+    elif 'horiz_board_edge' in temp_snake.states and 'vert_board_edge' in temp_snake.states:
 
         #top left corner
         if head_x == 0 and head_y == 0:
             possible_moves = ['down', 'right']
         #top right corner
-        elif head_x == board.width - 1 and head_y == 0:
+        elif head_x == temp_board.width - 1 and head_y == 0:
             possible_moves = ['down', 'left']
         #bottom left corner
-        elif head_x == 0 and head_y == board.height - 1:
+        elif head_x == 0 and head_y == temp_board.height - 1:
             possible_moves = ['up', 'right']
         #bottom right corner
-        elif head_x == board.width - 1 and head_y == board.height - 1:
+        elif head_x == temp_board.width - 1 and head_y == temp_board.height - 1:
             possible_moves = ['up', 'left']
 
     else:
@@ -212,16 +224,16 @@ def check_valid_moves(snake, position, board, influence):
 
         spacetaker = ''
         if possible_moves[i] == 'up':
-            spacetaker = board.get_grid_space(tile_x, tile_y - 1)
+            spacetaker = temp_board.get_grid_space(tile_x, tile_y - 1)
 
         elif possible_moves[i] == 'down':
-            spacetaker = board.get_grid_space(tile_x, tile_y + 1)
+            spacetaker = temp_board.get_grid_space(tile_x, tile_y + 1)
 
         elif possible_moves[i] == 'left':
-            spacetaker = board.get_grid_space(tile_x - 1, tile_y)
+            spacetaker = temp_board.get_grid_space(tile_x - 1, tile_y)
 
         elif possible_moves[i] == 'right':
-            spacetaker = board.get_grid_space(tile_x + 1, tile_y)
+            spacetaker = temp_board.get_grid_space(tile_x + 1, tile_y)
 
         #not a valid tile
         if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
@@ -250,7 +262,7 @@ def a_star_search(board, snake, enemies, start, target):
     open_set = []
     closed_set = []
 
-    #create a new temp Board/enemies/self for future tail prediction - maintains the original Board object
+    #create a new temp board/enemies/self for future tail prediction - maintains the original Board object
     temp_board = deepcopy(board)
     temp_enemies = []
     for enemy in enemies:
@@ -440,12 +452,12 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
             for enemy in enemies:
                         
                 if enemy.get_head() == adjacent_check:
-                    enemy_length = len(enemy.body)
+                    enemy_length = enemy.get_length()
                     enemy_found = True
                     break
 
                 #if not a head collision, check for enemy body and reduce influence for that immediate move
-                for part in enemy.body:
+                for part in enemy.get_body():
 
                     if part == adjacent_check:
                         if move == 'up':
@@ -460,7 +472,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
         if enemy_found:
 
             #compare lengths
-            if len(snake.body) <= enemy_length: 
+            if snake.get_length() <= enemy.get_length(): 
                 return True
 
     #if loop completes without finding larger snake, move is safe
@@ -588,7 +600,8 @@ def start():
 
 --------------------MOVE RESPONSE--------------------
 {
-  "move": "right"
+  "move": "right",
+  "shout": "It's snack time!"
 }
 '''
 
@@ -638,12 +651,12 @@ def move():
         closest_food, closest_dist = find_food(my_snake, board)
 
         if ((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
-                (closest_food and my_snake.health <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)):
+                (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)):
 
             food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
 
             if ((food_path and len(food_path) <= MAX_SEARCH_PATH_LEN) or
-                    (food_path and my_snake.health <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
+                    (food_path and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
 
                 if my_snake.get_head():
                     search_moves = my_snake.dirs_towards(food_path[0])
@@ -659,7 +672,7 @@ def move():
 
         else:
             chase_tail = a_star_search(board, my_snake, search_tile, enemy_snakes, my_snake.get_tail())
-            
+
             if chase_tail:
                 search_moves = my_snake.dirs_towards(chase_tail[0])
 
@@ -675,7 +688,7 @@ def move():
     #----------MOVE DECISION-MAKING----------
     #priority influence 1
     #ADDED - drive snake away from edge, towards middle
-    possible_moves = check_valid_moves(my_snake, my_snake.get_head(), board, influence)
+    possible_moves = check_valid_moves(my_snake, my_snake.get_head(), board, enemy_snakes, influence)
 
     #check further for any larger, incoming snakes that would result in a death collision
     possible_moves = [move for move in possible_moves if not incoming_enemy_snake(board, my_snake, move, enemy_snakes, influence)]

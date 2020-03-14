@@ -87,7 +87,16 @@ class Snake(object):
             Creates an instance of an existing snake in the arena.
 
         get_head(self):
-            Returns the head of the snake, even if it doesn't have a head attribute.
+            Returns the head of the snake, or None if non-existent.
+
+        get_tail(self):
+            Returns the tail of the snake, or None if non-existent.
+
+        get_body(self):
+            Returns the body (list of tuples) of the snake.
+
+        get_health(self):
+            Returns the health of the snake.
 
         get_length(self):
             Returns the total length of the snake.
