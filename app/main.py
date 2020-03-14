@@ -115,10 +115,10 @@ def find_food(snake, board):
         hyp = snake.get_distance_to(tuple(meal))
 
         if hyp < closest_dist:
-            closest_dist = float(hyp)
+            closest_dist = hyp
             closest_food = tuple(meal)
         
-    return meal, closest_dist
+    return closest_food, closest_dist
 
 
 '''
