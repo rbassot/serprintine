@@ -97,7 +97,7 @@ def initialize(request):
 
 
 '''
-find_food: Calculates the coordinates of the closest food source to the snake's
+Function to calculate the coordinates of the closest food source to the snake's
     head, using Pythagorus. Returns a tuple of the x & y coordinates.
 '''
 def find_food(snake, board):
@@ -157,7 +157,8 @@ def get_states(snake, board, influence):
 '''
 Function to check all the valid moves (directly adjacent) from a selected position on the board.
     Moving into a wall/snake/own body are considered invalid. Also adjusts influence to drive the
-    snake away from an edge of the board.
+    snake away from an edge of the board. Moves take into account if snake tails will have moved
+    away by the time that space is reached.
 '''
 def check_valid_moves(snake, position, board, enemies, influence):
 
@@ -246,8 +247,9 @@ def check_valid_moves(snake, position, board, enemies, influence):
 
 '''
 Function to perform an A* search for a desired destination point (own tail, closest food ...).
-Returns the complete shortest path (list of x & y coordinate tuples) to the target, excluding the start position.
-Moves take in to account if snake tails will have moved away by the time that space is reached.
+    Returns the complete shortest path (list of x & y coordinate tuples) to the target, excluding
+    the start position. Moves take into account if snake tails will have moved away by the time
+    that space is reached.
 
 Algorithm:
     F = Total cost of the node; F = G + H
@@ -262,7 +264,7 @@ def a_star_search(board, snake, enemies, start, target):
     open_set = []
     closed_set = []
 
-    #create a new temp board/enemies/self for future tail prediction - maintains the original Board object
+    #create a new temp board/enemies/self for future tail prediction - maintains the original objects
     temp_board = deepcopy(board)
     temp_enemies = []
     for enemy in enemies:
@@ -395,36 +397,51 @@ Returns True if a larger enemy snake head is adjacent, else returns False.
 '''
 def incoming_enemy_snake(board, snake, move, enemies, influence):
 
+    #create a new temp board/enemies/self for future tail prediction - maintains the original Board object
+    temp_board = deepcopy(board)
+    temp_enemies = []
+    for enemy in enemies:
+        temp_enemy = deepcopy(enemy)
+        temp_enemies.append(temp_enemy)
+
+    temp_snake = deepcopy(snake)
+
     #get direction that must not be checked, and analysis tile position
     if move == 'up':
         no_check = 'down'
-        x, y = snake.get_head()
+        x, y = temp_snake.get_head()
         tile_analyzed = (x, y - 1)
 
     elif move == 'down':
         no_check = 'up'
-        x, y = snake.get_head()
+        x, y = temp_snake.get_head()
         tile_analyzed = (x, y + 1)
 
     elif move == 'left':
         no_check = 'right'
-        x, y = snake.get_head()
+        x, y = temp_snake.get_head()
         tile_analyzed = (x - 1, y)
 
     elif move == 'right':
         no_check = 'left'
-        x, y = snake.get_head()
+        x, y = temp_snake.get_head()
         tile_analyzed = (x + 1, y)
+
+    #adjust tails for next direct move -- 1 space away from head here
+    adjust_future_tails(temp_board, temp_snake, temp_enemies)
 
     #assure analysis tile is on the grid & a valid open space
     tile_x, tile_y = tile_analyzed
-    if ((tile_x < 0 or tile_x > board.width - 1 or tile_y < 0 or tile_y > board.width - 1)
-            or (board.get_grid_space(tile_x, tile_y) != 'empty' and board.get_grid_space(tile_x, tile_y) != 'food')):
+    if ((tile_x < 0 or tile_x > temp_board.width - 1 or tile_y < 0 or tile_y > temp_board.width - 1)
+            or (temp_board.get_grid_space(tile_x, tile_y) != 'empty' and temp_board.get_grid_space(tile_x, tile_y) != 'food')):
         return True
 
     #check adjacents to the analysis tile
     adjacent_dirs = ['up', 'down', 'left', 'right']
     adjacent_dirs.remove(no_check)
+
+    #adjust tails for next move check -- 2 spaces away from head here
+    adjust_future_tails(temp_board, temp_snake, temp_enemies)
 
     for adjacent in adjacent_dirs:
 
@@ -433,23 +450,23 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
 
         #check for which adjacency
         if adjacent == 'up':
-            spacetaker = board.get_grid_space(tile_x, tile_y - 1)
+            spacetaker = temp_board.get_grid_space(tile_x, tile_y - 1)
             adjacent_check = (tile_x, tile_y - 1)
         elif adjacent == 'down':
-            spacetaker = board.get_grid_space(tile_x, tile_y + 1)
+            spacetaker = temp_board.get_grid_space(tile_x, tile_y + 1)
             adjacent_check = (tile_x, tile_y + 1)
         elif adjacent == 'left':
-            spacetaker = board.get_grid_space(tile_x - 1, tile_y)
+            spacetaker = temp_board.get_grid_space(tile_x - 1, tile_y)
             adjacent_check = (tile_x - 1, tile_y)
         elif adjacent == 'right':
-            spacetaker = board.get_grid_space(tile_x + 1, tile_y)
+            spacetaker = temp_board.get_grid_space(tile_x + 1, tile_y)
             adjacent_check = (tile_x + 1, tile_y)
 
 
         if spacetaker == 'enemysnake' or spacetaker == 'mysnake':
                 
             #find adjacent snake and check its length
-            for enemy in enemies:
+            for enemy in temp_enemies:
                         
                 if enemy.get_head() == adjacent_check:
                     enemy_length = enemy.get_length()
@@ -472,7 +489,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
         if enemy_found:
 
             #compare lengths
-            if snake.get_length() <= enemy.get_length(): 
+            if temp_snake.get_length() <= enemy.get_length(): 
                 return True
 
     #if loop completes without finding larger snake, move is safe
