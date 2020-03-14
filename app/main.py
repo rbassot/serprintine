@@ -115,6 +115,17 @@ def find_food(snake, board):
         hyp = snake.get_distance_to(tuple(meal))
 
         if hyp < closest_dist:
+
+            #check before if the food contains only 1 direct entry (3/4 adjacent tiles blocked)
+            meal_x, meal_y = meal
+            meal_adjacents = [board.get_grid_space(meal_x, meal_y - 1),
+                                board.get_grid_space(meal_x, meal_y + 1),
+                                board.get_grid_space(meal_x - 1, meal_y),
+                                board.get_grid_space(meal_x + 1, meal_y)]
+            meal_adjacents = [x for x in meal_adjacents if (x != '' and x != 'enemysnake' and x != 'mysnake')]
+            if len(meal_adjacents) < 2:
+                return False
+
             closest_dist = hyp
             closest_food = tuple(meal)
         
