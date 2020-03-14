@@ -98,7 +98,7 @@ def initialize(request):
 
 
 '''
-Function to calculate the coordinates of the closest food source to the snake's
+Function to calculate the coordinates of the closest -available- food source to the snake's
     head, using Pythagorus. Returns a tuple of the x & y coordinates.
 '''
 def find_food(snake, board):
@@ -124,7 +124,7 @@ def find_food(snake, board):
                                 board.get_grid_space(meal_x + 1, meal_y)]
             meal_adjacents = [x for x in meal_adjacents if (x != '' and x != 'enemysnake' and x != 'mysnake')]
             if len(meal_adjacents) < 2:
-                return False
+                continue
 
             closest_dist = hyp
             closest_food = tuple(meal)
