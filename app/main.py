@@ -24,7 +24,6 @@ CLOSE_FOOD_INFLUENCE = 6
 CHASE_TAIL_INFLUENCE = 6
 
 FLEE_ENEMIES_INFLUENCE = 5
-ENEMY_WILL_GROW = 10
 
 CLOSE_FOOD_MAX_DIST = 6
 MAX_SEARCH_PATH_LEN = 8
@@ -32,7 +31,7 @@ HEAD_SEARCH_MULT = 1.5
 
 
 #A* Search constants
-HEURISTIC_WEIGHT = 3
+HEURISTIC_WEIGHT = 2.5
 
 #----------GAME FUNCTIONS-----------
 
@@ -395,18 +394,10 @@ def a_star_search(board, snake, enemies, start, target):
 
 
 '''
-
-
-Function to direct the snake towards the more open area in the case that only 2 moves are valid.
-'''
-
-
-
-'''
 Function to check for enemy snakes 2 spaces away that could collide and cause death. Basically a further
-safety check 2 tiles in each direction.
+    safety check 2 tiles in each direction.
 
-Returns True if a larger enemy snake head is adjacent, else returns False.
+    Returns True if a larger enemy snake head is adjacent, else returns False.
 '''
 def incoming_enemy_snake(board, snake, move, enemies, influence):
 
@@ -511,7 +502,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
 
 '''
 Function to adjust the tails of all snakes on the board for the next turn.
-Allows the discovery of future open squares that open once a turn passes.
+    Allows the discovery of future open squares that open once a turn passes.
 '''
 def adjust_future_tails(board, snake, enemies):
 
@@ -538,6 +529,23 @@ def adjust_future_tails(board, snake, enemies):
 
     return
 
+
+'''Function to compare direct snake head distances to a target object, using Pythagorus.
+        Returns False if any one enemy is closer than the passed snake, otherwise, returns True.
+'''
+def is_closest_snake(snake, target, dist, enemies):
+
+    snake_dist = dist
+    for enemy in enemies:
+
+        #check if enemy head exists
+        if enemy.get_distance_to(target) == None:
+            continue
+
+        if enemy.get_distance_to(target) < snake_dist:
+            return False
+
+    return True
 
 
 @bottle.route('/')
@@ -686,8 +694,9 @@ def move():
             closest_food = False
             closest_dist = None
 
-        if ((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
-                (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)):
+        if (((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
+                (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)) and
+                is_closest_snake(my_snake, closest_food, closest_dist, enemy_snakes)):
 
             food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
 

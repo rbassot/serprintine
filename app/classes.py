@@ -172,9 +172,12 @@ class Snake(object):
         return "right"
 
     def get_distance_to(self, target):
-        x, y = self.get_head()
-        target_x, target_y = target
-        return float(math.sqrt(  (x - target_x)**2 + (y - target_y)**2  ))
+        try:
+            x, y = self.get_head()
+            target_x, target_y = target
+            return float(math.sqrt(  (x - target_x)**2 + (y - target_y)**2  ))
+        except IndexError:
+            return None
 
     def dir_towards(self, target):
         target_x, target_y = target
