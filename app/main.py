@@ -519,8 +519,8 @@ def adjust_future_tails(board, snake, enemies):
         enemy.body.pop()
         board.set_grid_space(x, y, 'empty')
 
-    #replace my own tail
-    if not snake.get_tail():
+    #replace my own tail, if I haven't just eaten
+    if not snake.get_tail() or snake.get_health() == MAX_HEALTH:
         return
 
     x, y = snake.get_tail()
