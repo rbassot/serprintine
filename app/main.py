@@ -23,7 +23,7 @@ BOARD_EDGE_INFLUENCE = 10
 CLOSE_FOOD_INFLUENCE = 6
 CHASE_TAIL_INFLUENCE = 6
 
-FLEE_ENEMIES_INFLUENCE = 7
+FLEE_ENEMIES_INFLUENCE = 5
 
 CLOSE_FOOD_MAX_DIST = 6
 MAX_SEARCH_PATH_LEN = 8
@@ -548,9 +548,6 @@ def is_closest_snake(snake, target, dist, enemies):
     return True
 
 
-#def take_safer_move(board, snake, )
-
-
 @bottle.route('/')
 def index():
     return "<h1>Serprintine*</h1>"
@@ -786,10 +783,6 @@ def move():
         move_influences.append(influence.move_left)
     if 'right' in possible_moves:
         move_influences.append(influence.move_right)
-
-    print(possible_moves)
-    print('---------')
-    print(move_influences)
 
     move_pairs = dict(zip(possible_moves, move_influences))
     move = max(move_pairs, key=move_pairs.get)
