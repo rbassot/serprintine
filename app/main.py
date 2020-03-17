@@ -20,6 +20,7 @@ MAX_HEALTH = 100
 HUNGER_MULTIPLIER = 3
 
 BOARD_EDGE_INFLUENCE = 10
+FLEE_EDGES_MULT = 1.3
 CLOSE_FOOD_INFLUENCE = 6
 CHASE_TAIL_INFLUENCE = 6
 
@@ -101,6 +102,7 @@ def initialize(request):
 '''
 Function to calculate the coordinates of the closest -available- food source to the snake's
     head, using Pythagorus. Returns a tuple of the x & y coordinates.
+    **Current implementation prevents snake from eating any food in an exact corner of the board.**
 '''
 def find_food(snake, board):
 
@@ -124,6 +126,7 @@ def find_food(snake, board):
                                 board.get_grid_space(meal_x - 1, meal_y),
                                 board.get_grid_space(meal_x + 1, meal_y)]
             meal_adjacents = [x for x in meal_adjacents if (x != '' and x != 'enemysnake' and x != 'mysnake')]
+
             if len(meal_adjacents) < 2:
                 continue
 
@@ -142,15 +145,18 @@ def get_states(snake, board, influence):
     #check for snake's head location at board edges - 1st priority influence
     head_x, head_y = snake.get_head()
 
+    #snake is on left or right edge
     if head_x == 0 or head_x == board.width - 1:
         influence.inc_up(BOARD_EDGE_INFLUENCE)
         influence.inc_down(BOARD_EDGE_INFLUENCE)
         snake.add_state('horiz_board_edge')
 
         if head_x == 0:
+            influence.inc_right(BOARD_EDGE_INFLUENCE * FLEE_EDGES_MULT)
             snake.add_state('left_board_edge')
 
         else:
+            influence.inc_left(BOARD_EDGE_INFLUENCE * FLEE_EDGES_MULT)
             snake.add_state('right_board_edge')
 
     if head_y == 0 or head_y == board.height - 1:
@@ -159,9 +165,11 @@ def get_states(snake, board, influence):
         snake.add_state('vert_board_edge')
 
         if head_y == 0:
+            influence.inc_down(BOARD_EDGE_INFLUENCE * FLEE_EDGES_MULT)
             snake.add_state('top_board_edge')
 
         else:
+            influence.inc_up(BOARD_EDGE_INFLUENCE * FLEE_EDGES_MULT)
             snake.add_state('bottom_board_edge')
 
     return
@@ -194,21 +202,21 @@ def check_valid_moves(snake, position, board, enemies, influence):
     if 'horiz_board_edge' in temp_snake.states and 'vert_board_edge' not in temp_snake.states:
         if 'left_board_edge' in temp_snake.states:
             possible_moves = ['up', 'down', 'right']
-            influence.inc_right(BOARD_EDGE_INFLUENCE + 1)
+            #influence.inc_right(BOARD_EDGE_INFLUENCE)
 
         elif 'right_board_edge' in temp_snake.states:
             possible_moves = ['up', 'down', 'left']
-            influence.inc_left(BOARD_EDGE_INFLUENCE + 1)
+            #influence.inc_left(BOARD_EDGE_INFLUENCE)
 
     elif 'vert_board_edge' in temp_snake.states and 'horiz_board_edge' not in temp_snake.states:
 
         if 'top_board_edge' in temp_snake.states:
             possible_moves = ['down', 'left', 'right']
-            influence.inc_down(BOARD_EDGE_INFLUENCE + 1)
+            #influence.inc_down(BOARD_EDGE_INFLUENCE)
 
         elif 'bottom_board_edge' in temp_snake.states:
             possible_moves = ['up', 'left', 'right']
-            influence.inc_up(BOARD_EDGE_INFLUENCE + 1)
+            #influence.inc_up(BOARD_EDGE_INFLUENCE)
 
     elif 'horiz_board_edge' in temp_snake.states and 'vert_board_edge' in temp_snake.states:
 
