@@ -19,17 +19,15 @@ LOW_HEALTH = 30
 MAX_HEALTH = 100
 HUNGER_MULTIPLIER = 3
 
-BOARD_EDGE_INFLUENCE = 10
+BOARD_EDGE_INFLUENCE = 20
 FLEE_EDGES_MULT = 1.3
-CLOSE_FOOD_INFLUENCE = 6
-CHASE_TAIL_INFLUENCE = 6
-
-FLEE_ENEMIES_INFLUENCE = 7
+CLOSE_FOOD_INFLUENCE = 12
+CHASE_TAIL_INFLUENCE = 12
+FLEE_ENEMIES_INFLUENCE = 14
 
 CLOSE_FOOD_MAX_DIST = 6
 MAX_SEARCH_PATH_LEN = 8
 HEAD_SEARCH_MULT = 1.5
-
 
 #A* Search constants
 HEURISTIC_WEIGHT = 2.5
@@ -164,6 +162,7 @@ def get_states(snake, board, influence):
             influence.inc_left(BOARD_EDGE_INFLUENCE * FLEE_EDGES_MULT)
             snake.add_state('right_board_edge')
 
+    #snake is on top or bottom edge
     if head_y == 0 or head_y == board.height - 1:
         influence.inc_left(BOARD_EDGE_INFLUENCE)
         influence.inc_right(BOARD_EDGE_INFLUENCE)
@@ -540,8 +539,9 @@ def adjust_future_tails(board, snake, enemies):
     return
 
 
-'''Function to compare direct snake head distances to a target object, using Pythagorus.
-        Returns False if any one enemy is closer than the passed snake, otherwise, returns True.
+'''
+Function to compare direct snake head distances to a target object, using Pythagorus.
+    Returns False if any one enemy is closer than the passed snake, otherwise, returns True.
 '''
 def is_closest_snake(snake, target, dist, enemies):
 
