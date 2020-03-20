@@ -24,7 +24,7 @@ FLEE_EDGES_MULT = 1.3
 CLOSE_FOOD_INFLUENCE = 6
 CHASE_TAIL_INFLUENCE = 6
 
-FLEE_ENEMIES_INFLUENCE = 5
+FLEE_ENEMIES_INFLUENCE = 7
 
 CLOSE_FOOD_MAX_DIST = 6
 MAX_SEARCH_PATH_LEN = 8
@@ -65,13 +65,19 @@ def initialize(request):
     #my snake maintenance
     health = int(request['you']['health'])
     body = []
+    head_tile = True
     for part in request['you']['body']:
         x = int(part['x'])
         y = int(part['y'])
         body.append((x, y))
         row = y
         col = x
-        grid[row][col] = 'mysnake'
+
+        if head_tile:
+            grid[row][col] = 'mysnakehead'
+            head_tile = False
+        else:
+            grid[row][col] = 'mysnake'
 
     my_snake = classes.Snake(body, health)
 
@@ -102,7 +108,6 @@ def initialize(request):
 '''
 Function to calculate the coordinates of the closest -available- food source to the snake's
     head, using Pythagorus. Returns a tuple of the x & y coordinates.
-    **Current implementation prevents snake from eating any food in an exact corner of the board.**
 '''
 def find_food(snake, board):
 
@@ -258,7 +263,7 @@ def check_valid_moves(snake, position, board, enemies, influence):
             spacetaker = temp_board.get_grid_space(tile_x + 1, tile_y)
 
         #not a valid tile
-        if spacetaker == 'mysnake' or spacetaker == 'enemysnake':
+        if spacetaker == 'mysnake' or spacetaker == 'mysnakehead' or spacetaker == 'enemysnake':
             possible_moves.pop(i)
             i -= 1
         i += 1
@@ -403,7 +408,7 @@ def a_star_search(board, snake, enemies, start, target):
 
 '''
 Function to check for enemy snakes 2 spaces away that could collide and cause death. Basically a further
-    safety check 2 tiles in each direction.
+    safety check 2 tiles in each direction. 'Move' parameter is the direct move that will be checked.
 
     Returns True if a larger enemy snake head is adjacent, else returns False.
 '''
@@ -419,24 +424,21 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
     temp_snake = deepcopy(snake)
 
     #get direction that must not be checked, and analysis tile position
+    x, y = temp_snake.get_head()
     if move == 'up':
         no_check = 'down'
-        x, y = temp_snake.get_head()
         tile_analyzed = (x, y - 1)
 
     elif move == 'down':
         no_check = 'up'
-        x, y = temp_snake.get_head()
         tile_analyzed = (x, y + 1)
 
     elif move == 'left':
         no_check = 'right'
-        x, y = temp_snake.get_head()
         tile_analyzed = (x - 1, y)
 
     elif move == 'right':
         no_check = 'left'
-        x, y = temp_snake.get_head()
         tile_analyzed = (x + 1, y)
 
     #adjust tails for next direct move -- 1 space away from head here
@@ -474,8 +476,8 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
             spacetaker = temp_board.get_grid_space(tile_x + 1, tile_y)
             adjacent_check = (tile_x + 1, tile_y)
 
-
-        if spacetaker == 'enemysnake' or spacetaker == 'mysnake':
+        #CHANGE THIS?? WHY IS MY OWN SNAKE HERE
+        if spacetaker == 'enemysnake': #or spacetaker == 'mysnake' or spacetaker == 'mysnakehead':
                 
             #find adjacent snake and check its length
             for enemy in temp_enemies:
@@ -771,15 +773,16 @@ def move():
     #ADDED - drive snake away from edge, towards middle
     possible_moves = check_valid_moves(my_snake, my_snake.get_head(), board, enemy_snakes, influence)
 
-    #check further for any larger, incoming snakes that would result in a death collision
-    possible_moves = [move for move in possible_moves if not incoming_enemy_snake(board, my_snake, move, enemy_snakes, influence)]
-
     #priority influence 2 - remove invalid direction
     if invalid_dir:
         try:
             possible_moves.remove(invalid_dir)
         except ValueError:
             pass
+
+    #check further for any larger, incoming snakes that would result in a death collision
+    if len(possible_moves) > 1:
+        possible_moves = [move for move in possible_moves if not incoming_enemy_snake(board, my_snake, move, enemy_snakes, influence)]
     
     #secondary influences
     move_influences = []
