@@ -406,6 +406,31 @@ def a_star_search(board, snake, enemies, start, target):
 
 
 '''
+Function to perform a dead-end filling alogorithm with dead-ends -- tiles with 3 of 4
+    blocked/occupied adjacents -- on the board's grid attribute.
+'''
+def dead_end_filling(board):
+
+    #iterate through the grid and check for dead-ends
+    for row in len(board.grid):
+        for col in len(board.grid[row]):
+
+            #if tile is occupied, it can't be a dead end
+            tile = board.get_grid_space(row, col)
+            if tile not in ('empty', 'food'):
+                continue
+
+            #check if tile is a dead end
+            y = row
+            x = col
+            end_flag = board.is_dead_end(x, y)
+
+            if end_flag:
+                board.fill_path(x, y)
+
+
+
+'''
 Function to check for enemy snakes 2 spaces away that could collide and cause death. Basically a further
     safety check 2 tiles in each direction. 'Move' parameter is the direct move that will be checked.
 

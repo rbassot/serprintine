@@ -17,11 +17,34 @@ class Board(object):
         __init__(self, width, height, food):
             Creates an instance of a Battlesnake game board.
 
+        get_height(self):
+            Returns the height (int) of the game board.
+
+        get_width(self):
+            Returns the width (int) of the game board.
+
+        get_food(self):
+            Returns the list containing all food coordinates on the board.
+
         get_grid_space(self, x, y):
             Returns the value (string) occupying the tile at the x & y coordinates of the grid.
 
+        get_grid(self):
+            Returns the grid (2D list) describing the locations
+
         set_grid_space(self, x, y, value):
             Sets the value (string) that will occupy the tile at the x & y coordinates of the grid.
+
+        is_dead_end(self, x, y):
+            Returns True if the tile at the passed coordinates is not occupied and has either:
+            only one approachable entry (ie. 3 of 4 adjacent tiles are blocked/occupied), or no entries.
+
+        find_open_tiles(self, x, y):
+            Returns a list of all the open unoccupied tiles that are adjacent to the passed coordinates.
+            Will return an empty list if there are none.
+
+        fill_path(self, x, y):
+            Iteratively fills the entire open path on the grid by starting from a specified dead end.
     '''
     
     def __init__(self, width, height, food, grid, turn):
@@ -65,6 +88,42 @@ class Board(object):
         except IndexError or ValueError:
             return
         return
+
+    def get_adjacent_spaces(self, x, y):
+        return [(x, y - 1), (x, y + 1), (x - 1, y), (x + 1, y)]
+
+    def is_dead_end(self, x, y):
+        if self.get_grid_space(x, y) not in ('empty', 'food'):
+            return False
+
+        blocked_count = 0
+        for adj_x, adj_y in self.get_adjacent_spaces(x, y):
+            if self.get_grid_space(adj_x, adj_y) not in ('empty', 'food'):
+                blocked_count += 1
+
+        if blocked_count >= 3:
+            return True
+        return False
+
+    def find_open_tiles(self, x, y):
+        #directions = ['up', 'down', 'left', 'right']
+        adjacencies = self.get_adjacent_spaces(x, y)
+        open_tiles = []
+        for tile_x, tile_y in adjacencies:
+            if (self.get_grid_space(tile_x, tile_y) == 'empty' or self.get_grid_space(tile_x, tile_y) == 'food'):
+                open_tiles.append((tile_x, tile_y))
+
+        return open_tiles
+
+
+    def fill_path(self, x, y):
+        while self.is_dead_end(x, y):
+            open_adjacents = find_open_tiles(x, y)
+            if len(open_adjacents) == 1:
+                self.set_grid_space(x, y, 'filled')
+                next_x, next_y = open_adjacents[0]
+                x, y = next_x, next_y
+                
 
 
 class Snake(object):
