@@ -884,7 +884,7 @@ def move():
 
         for move in possible_moves:
             if incoming_enemy_snake(board, my_snake, move, enemy_snakes, influence) and len(possible_moves) > 1:
-                possible_move.remove(move)
+                possible_moves.remove(move)
     
     #secondary influences
     move_influences = []
