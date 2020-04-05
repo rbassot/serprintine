@@ -20,12 +20,12 @@ MAX_HEALTH = 100
 HUNGER_MULTIPLIER = 3
 
 BOARD_EDGE_INFLUENCE = 20
-FLEE_EDGES_MULT = 1.3
-CLOSE_FOOD_INFLUENCE = 12
-CHASE_TAIL_INFLUENCE = 12
-FLEE_ENEMIES_INFLUENCE = 14
+FLEE_EDGES_MULT = 1.2
+CLOSE_FOOD_INFLUENCE = 13
+CHASE_TAIL_INFLUENCE = 13
+FLEE_ENEMIES_INFLUENCE = 10
 KILL_ENEMY_INFLUENCE = 14
-DEAD_END_DETERRENCE = 18
+DEAD_END_DETERRENCE = 25
 
 CLOSE_FOOD_MAX_DIST = 6
 MAX_SEARCH_PATH_LEN = 8
@@ -544,6 +544,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
         if enemy_found:
 
             #compare snake lengths
+            #**currently attacks towards equal snakes!**
             if temp_snake.get_length() <= enemy.get_length(): 
 
                 #motivate the snake to move into the direction parameter to make a kill
