@@ -522,15 +522,14 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
         if spacetaker == 'enemysnake':
                 
             #find the adjacent snake and check its length
-            for enemy in temp_enemies:
+            for temp_enemy in temp_enemies:
                         
-                if enemy.get_head() == adjacent_check:
-                    enemy_length = enemy.get_length()
+                if temp_enemy.get_head() == adjacent_check:
                     enemy_found = True
                     break
 
                 #if not a head collision, check for enemy body and reduce influence for that immediate move
-                for part in enemy.get_body():
+                for part in temp_enemy.get_body():
 
                     if part == adjacent_check:
                         if move == 'up':
@@ -545,7 +544,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
         if enemy_found:
 
             #compare snake lengths -- my snake is longer
-            if temp_snake.get_length() > enemy.get_length(): 
+            if snake.get_length() > enemy.get_length(): 
 
                 #motivate the snake to move into the direction parameter to make a kill -- return False
                 if move == 'up':
