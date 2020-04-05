@@ -74,23 +74,21 @@ class Board(object):
         return self.turn
 
     def get_grid_space(self, x, y):
-        try:
-            row = y
-            col = x
-            grid_space = self.grid[row][col]
+        row = y
+        col = x
+        if x < 0 or x > self.width - 1 or y < 0 or y > self.height - 1:
+            return 'invalid'
 
-        except IndexError:
-            return ''
+        grid_space = self.grid[row][col]
         return grid_space
 
     def set_grid_space(self, x, y, value):
-        try:
-            row = y
-            col = x
-            self.grid[row][col] = value
+        row = y
+        col = x
+        if x < 0 or x > self.width - 1 or y < 0 or y > self.height - 1:
+            return 'invalid'
 
-        except IndexError or ValueError:
-            return
+        self.grid[row][col] = value
         return
 
     def get_adjacent_spaces(self, x, y):
