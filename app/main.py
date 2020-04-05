@@ -24,7 +24,8 @@ FLEE_EDGES_MULT = 1.3
 CLOSE_FOOD_INFLUENCE = 12
 CHASE_TAIL_INFLUENCE = 12
 FLEE_ENEMIES_INFLUENCE = 14
-DEAD_END_DETERRENCE = 16
+KILL_ENEMY_INFLUENCE = 14
+DEAD_END_DETERRENCE = 18
 
 CLOSE_FOOD_MAX_DIST = 6
 MAX_SEARCH_PATH_LEN = 8
@@ -274,7 +275,7 @@ def check_valid_moves(snake, position, board, enemies, influence):
                 influence.inc_right(-DEAD_END_DETERRENCE)
 
         #not a valid tile
-        if spacetaker in ('mysnake', 'mysnakehead', 'enemysnake'):
+        if spacetaker in ('mysnake', 'enemysnake'):
             possible_moves.pop(i)
             i -= 1
 
@@ -544,6 +545,17 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
 
             #compare snake lengths
             if temp_snake.get_length() <= enemy.get_length(): 
+
+                #motivate the snake to move into the direction parameter to make a kill
+                if move == 'up':
+                    influence.inc_up(KILL_ENEMY_INFLUENCE)
+                if move == 'down':
+                    influence.inc_down(KILL_ENEMY_INFLUENCE)
+                if move == 'left':
+                    influence.inc_left(KILL_ENEMY_INFLUENCE)
+                if move == 'right':
+                    influence.inc_right(KILL_ENEMY_INFLUENCE)
+
                 return True
 
     #if loop completes without finding larger snake, move is safe
