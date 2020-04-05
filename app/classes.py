@@ -38,6 +38,7 @@ class Board(object):
         is_dead_end(self, x, y):
             Returns True if the tile at the passed coordinates is not occupied and has either:
             only one approachable entry (ie. 3 of 4 adjacent tiles are blocked/occupied), or no entries.
+            **An adjacent tile is not blocked if my snake's head is the occupant**
 
         find_open_tiles(self, x, y):
             Returns a list of all the open unoccupied tiles that are adjacent to the passed coordinates.
@@ -101,7 +102,7 @@ class Board(object):
 
         blocked_count = 0
         for adj_x, adj_y in self.get_adjacent_spaces(x, y):
-            if self.get_grid_space(adj_x, adj_y) not in ('empty', 'food'):
+            if self.get_grid_space(adj_x, adj_y) not in ('empty', 'food', 'mysnakehead'):
                 blocked_count += 1
 
         if blocked_count >= 3:
