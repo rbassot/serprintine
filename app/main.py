@@ -16,6 +16,7 @@ from .api import ping_response, start_response, move_response, end_response
 
 #----------GAME CONSTANTS----------
 LOW_HEALTH = 30
+HUNGER_POINT = 75
 MAX_HEALTH = 100
 HUNGER_MULTIPLIER = 3
 
@@ -810,9 +811,11 @@ def move():
             closest_food = False
             closest_dist = None
 
-        if (((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
-                (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)) and
-                is_closest_snake(my_snake, closest_food, closest_dist, enemy_snakes)):
+        #Search for food -- only if hunger has begun, is valid/close enough food, and is closest snake
+        if (my_snake.get_health() <= HUNGER_POINT and 
+            ((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
+            (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)) and
+            is_closest_snake(my_snake, closest_food, closest_dist, enemy_snakes)):
 
             food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
 
@@ -844,6 +847,7 @@ def move():
                     if 'right' in search_moves:
                         influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
+        #otherwise, search for own tail
         else:
             chase_tail = a_star_search(board, my_snake, enemy_snakes, search_tile, my_snake.get_tail())
 
