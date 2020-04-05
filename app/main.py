@@ -24,6 +24,7 @@ FLEE_EDGES_MULT = 1.3
 CLOSE_FOOD_INFLUENCE = 12
 CHASE_TAIL_INFLUENCE = 12
 FLEE_ENEMIES_INFLUENCE = 14
+DEAD_END_DETERRENCE = 18
 
 CLOSE_FOOD_MAX_DIST = 6
 MAX_SEARCH_PATH_LEN = 8
@@ -33,9 +34,9 @@ HEAD_SEARCH_MULT = 1.5
 HEURISTIC_WEIGHT = 2.5
 
 #----------GAME FUNCTIONS-----------
-
 '''
-initialize(): Function to maintain the JSON request data for usability.
+Function to parse the JSON request data for usability. Object classes are instantiated here 
+and maintained throughout the turn.
 '''
 def initialize(request):
 
@@ -103,6 +104,7 @@ def initialize(request):
     return my_snake, enemy_snakes, board
 
 
+
 '''
 Function to calculate the coordinates of the closest -available- food source to the snake's
     head, using Pythagorus. Returns a tuple of the x & y coordinates.
@@ -137,6 +139,7 @@ def find_food(snake, board):
             closest_food = tuple(meal)
         
     return closest_food, closest_dist
+
 
 
 '''
@@ -177,6 +180,7 @@ def get_states(snake, board, influence):
             snake.add_state('bottom_board_edge')
 
     return
+
 
 
 '''
@@ -243,6 +247,7 @@ def check_valid_moves(snake, position, board, enemies, influence):
 
     #---------- 2 ----------
     #check board components (enemy/own body) for valid moves
+    #dead-end filling -- if it's a discovered dead-end path, strongly deter the snake
     tile_x, tile_y = position
 
     i = 0
@@ -251,30 +256,46 @@ def check_valid_moves(snake, position, board, enemies, influence):
         spacetaker = ''
         if possible_moves[i] == 'up':
             spacetaker = temp_board.get_grid_space(tile_x, tile_y - 1)
+            
+            if spacetaker == 'filled':
+                influence.inc_up(-DEAD_END_DETERRENCE)
 
         elif possible_moves[i] == 'down':
             spacetaker = temp_board.get_grid_space(tile_x, tile_y + 1)
+            
+            if spacetaker == 'filled':
+                influence.inc_down(-DEAD_END_DETERRENCE)
 
         elif possible_moves[i] == 'left':
             spacetaker = temp_board.get_grid_space(tile_x - 1, tile_y)
+            
+            if spacetaker == 'filled':
+                influence.inc_left(-DEAD_END_DETERRENCE)
 
         elif possible_moves[i] == 'right':
             spacetaker = temp_board.get_grid_space(tile_x + 1, tile_y)
+            
+            if spacetaker == 'filled':
+                influence.inc_right(-DEAD_END_DETERRENCE)
 
         #not a valid tile
-        if spacetaker == 'mysnake' or spacetaker == 'mysnakehead' or spacetaker == 'enemysnake':
+        if spacetaker in ('mysnake', 'mysnakehead', 'enemysnake'):
             possible_moves.pop(i)
             i -= 1
+
         i += 1
         
     return possible_moves
 
 
+
 '''
-Function to perform an A* search for a desired destination point (own tail, closest food ...).
+Function to perform an A* search towards a desired target (own tail, closest food ...).
     Returns the complete shortest path (list of x & y coordinate tuples) to the target, excluding
     the start position. Moves take into account if snake tails will have moved away by the time
     that space is reached.
+
+    *Dead-end filling -- A* search will treat filled tiles as intraversable.
 
 Algorithm:
     F = Total cost of the node; F = G + H
@@ -303,7 +324,7 @@ def a_star_search(board, snake, enemies, start, target):
     start_x, start_y = start
     if start != temp_snake.get_head():
         if ((start_x < 0 or start_x > temp_board.width - 1 or start_y < 0 or start_y > temp_board.width - 1)
-                or (temp_board.get_grid_space(start_x, start_y) != 'empty' and temp_board.get_grid_space(start_x, start_y) != 'food')):
+                or (temp_board.get_grid_space(start_x, start_y) not in ('empty', 'food'))):
             print('Invalid starting position!')
             return None
 
@@ -357,7 +378,7 @@ def a_star_search(board, snake, enemies, start, target):
         for tile in adjacent_tiles:
             
             #skip tile if it's taken
-            if temp_board.get_grid_space(tile[0], tile[1]) != 'empty' and temp_board.get_grid_space(tile[0], tile[1]) != 'food':
+            if temp_board.get_grid_space(tile[0], tile[1]) not in ('empty', 'food'):
                 continue
 
             #create new child node and append
@@ -405,15 +426,16 @@ def a_star_search(board, snake, enemies, start, target):
     return None
 
 
+
 '''
-Function to perform a dead-end filling alogorithm with dead-ends -- tiles with 3 of 4
+Function to perform a dead end filling algorithm to mark dead-ends -- tiles with 3 of 4
     blocked/occupied adjacents -- on the board's grid attribute.
 '''
 def dead_end_filling(board):
 
     #iterate through the grid and check for dead-ends
-    for row in len(board.grid):
-        for col in len(board.grid[row]):
+    for row in range(len(board.grid)):
+        for col in range(len(board.grid[row])):
 
             #if tile is occupied, it can't be a dead end
             tile = board.get_grid_space(row, col)
@@ -421,8 +443,8 @@ def dead_end_filling(board):
                 continue
 
             #check if tile is a dead end
-            y = row
             x = col
+            y = row
             end_flag = board.is_dead_end(x, y)
 
             if end_flag:
@@ -447,7 +469,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
 
     temp_snake = deepcopy(snake)
 
-    #get direction that must not be checked, and analysis tile position
+    #get direction that must not be checked (own snake body) and analysis tile position
     x, y = temp_snake.get_head()
     if move == 'up':
         no_check = 'down'
@@ -465,10 +487,10 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
         no_check = 'left'
         tile_analyzed = (x + 1, y)
 
-    #adjust tails for next direct move -- 1 space away from head here
+    #adjust tails for direct move passed as parameter -- 1 space away from head here
     adjust_future_tails(temp_board, temp_snake, temp_enemies)
 
-    #assure analysis tile is on the grid & a valid open space
+    #assure analysis tile is on the grid & is a valid open space
     tile_x, tile_y = tile_analyzed
     if ((tile_x < 0 or tile_x > temp_board.width - 1 or tile_y < 0 or tile_y > temp_board.width - 1)
             or (temp_board.get_grid_space(tile_x, tile_y) != 'empty' and temp_board.get_grid_space(tile_x, tile_y) != 'food')):
@@ -478,7 +500,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
     adjacent_dirs = ['up', 'down', 'left', 'right']
     adjacent_dirs.remove(no_check)
 
-    #adjust tails for next move check -- 2 spaces away from head here
+    #adjust tails for following move check -- 2 spaces away from head here
     adjust_future_tails(temp_board, temp_snake, temp_enemies)
 
     for adjacent in adjacent_dirs:
@@ -500,10 +522,9 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
             spacetaker = temp_board.get_grid_space(tile_x + 1, tile_y)
             adjacent_check = (tile_x + 1, tile_y)
 
-        #CHANGE THIS?? WHY IS MY OWN SNAKE HERE
-        if spacetaker == 'enemysnake': #or spacetaker == 'mysnake' or spacetaker == 'mysnakehead':
+        if spacetaker == 'enemysnake':
                 
-            #find adjacent snake and check its length
+            #find the adjacent snake and check its length
             for enemy in temp_enemies:
                         
                 if enemy.get_head() == adjacent_check:
@@ -526,7 +547,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
 
         if enemy_found:
 
-            #compare lengths
+            #compare snake lengths
             if temp_snake.get_length() <= enemy.get_length(): 
                 return True
 
@@ -534,11 +555,17 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
     return False
 
 
+
 '''
 Function to adjust the tails of all snakes on the board for the next turn.
     Allows the discovery of future open squares that open once a turn passes.
+    This function accounts for dead-end filling by removing any fills, adjusting tails,
+    and recalculating new dead-ends.
 '''
 def adjust_future_tails(board, snake, enemies):
+
+    #remove any dead end filling currently on the grid
+    board.remove_fills()
 
     #replace all tails on the board with 'empty' if the snake hasn't just eaten, and adjust all snakes
     for enemy in enemies:
@@ -561,7 +588,11 @@ def adjust_future_tails(board, snake, enemies):
     snake.body.pop()
     board.set_grid_space(x, y, 'empty')
 
+    #rediscover new dead end paths
+    dead_end_filling(board)
+
     return
+
 
 
 '''
@@ -581,6 +612,7 @@ def is_closest_snake(snake, target, dist, enemies):
             return False
 
     return True
+
 
 
 @bottle.route('/')
@@ -694,8 +726,49 @@ def move():
     STRATEGY:
         - To calculate the number of move influences my snake has based on the situation of the game.
         - Total the influence counts after every check and finally select a direction to move in.
+        - A* Search finds desired paths; Dead end filling avoids entering paths where my snake would die.
     '''
     influence = classes.Influence()
+
+    #perform dead end filling algorithm on board's grid attribute
+    #TESTING
+    for row in range(len(board.grid)):
+        for col in range(len(board.grid[row])):
+            x = col
+            y = row
+
+            if board.get_grid_space(x, y) == 'filled':
+                print('F ', end='')
+                continue
+
+            if board.get_grid_space(x, y) in ('empty', 'food'):
+                print('- ', end='')
+                continue
+
+            print('X ', end='')
+
+        print()
+
+    print()
+    print()
+    dead_end_filling(board)
+    
+    for row in range(len(board.grid)):
+        for col in range(len(board.grid[row])):
+            x = col
+            y = row
+
+            if board.get_grid_space(x, y) == 'filled':
+                print('F ', end='')
+                continue
+
+            if board.get_grid_space(x, y) in ('empty', 'food'):
+                print('- ', end='')
+                continue
+
+            print('X ', end='')
+
+        print()
 
     #get snake states before calculation
     get_states(my_snake, board, influence)

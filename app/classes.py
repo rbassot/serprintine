@@ -45,6 +45,9 @@ class Board(object):
 
         fill_path(self, x, y):
             Iteratively fills the entire open path on the grid by starting from a specified dead end.
+
+        remove_fills(self):
+            Removes all fill markers in the board's grid attribute, resetting the lists.
     '''
     
     def __init__(self, width, height, food, grid, turn):
@@ -103,14 +106,14 @@ class Board(object):
 
         if blocked_count >= 3:
             return True
-        return False
+        else:
+            return False
 
     def find_open_tiles(self, x, y):
-        #directions = ['up', 'down', 'left', 'right']
         adjacencies = self.get_adjacent_spaces(x, y)
         open_tiles = []
         for tile_x, tile_y in adjacencies:
-            if (self.get_grid_space(tile_x, tile_y) == 'empty' or self.get_grid_space(tile_x, tile_y) == 'food'):
+            if self.get_grid_space(tile_x, tile_y) in ('empty', 'food'):
                 open_tiles.append((tile_x, tile_y))
 
         return open_tiles
@@ -118,12 +121,25 @@ class Board(object):
 
     def fill_path(self, x, y):
         while self.is_dead_end(x, y):
-            open_adjacents = find_open_tiles(x, y)
-            if len(open_adjacents) == 1:
+            open_adjacents = self.find_open_tiles(x, y)
+            if len(open_adjacents) <= 1:
                 self.set_grid_space(x, y, 'filled')
-                next_x, next_y = open_adjacents[0]
-                x, y = next_x, next_y
+                try:
+                    next_x, next_y = open_adjacents[0]
+                    x, y = next_x, next_y
+                except IndexError:
+                    continue
                 
+    def remove_fills(self):
+        for row in range(len(self.grid)):
+            for col in range(len(self.grid[row])):
+                x = col
+                y = row
+                if self.get_grid_space(x, y) == 'filled':
+                    if (x, y) in self.food:
+                        self.set_grid_space(x, y, 'food')
+                    else:
+                        self.set_grid_space(x, y, 'empty')
 
 
 class Snake(object):
