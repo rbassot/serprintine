@@ -24,7 +24,7 @@ BOARD_EDGE_INFLUENCE = 20
 FLEE_EDGES_MULT = 1.2
 CLOSE_FOOD_INFLUENCE = 13
 CHASE_TAIL_INFLUENCE = 13
-FLEE_ENEMIES_INFLUENCE = 10
+FLEE_ENEMIES_INFLUENCE = 8
 KILL_ENEMY_INFLUENCE = 14
 DEAD_END_DETERRENCE = 25
 
@@ -544,11 +544,10 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
 
         if enemy_found:
 
-            #compare snake lengths
-            #**currently attacks towards equal snakes!**
-            if temp_snake.get_length() <= enemy.get_length(): 
+            #compare snake lengths -- my snake is longer
+            if temp_snake.get_length() > enemy.get_length(): 
 
-                #motivate the snake to move into the direction parameter to make a kill
+                #motivate the snake to move into the direction parameter to make a kill -- return False
                 if move == 'up':
                     influence.inc_up(KILL_ENEMY_INFLUENCE)
                 if move == 'down':
@@ -558,6 +557,10 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
                 if move == 'right':
                     influence.inc_right(KILL_ENEMY_INFLUENCE)
 
+                return False
+
+            #my snake is shorter
+            else:
                 return True
 
     #if loop completes without finding larger snake, move is safe
