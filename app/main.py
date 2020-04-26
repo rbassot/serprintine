@@ -16,7 +16,6 @@ from .api import ping_response, start_response, move_response, end_response
 
 #----------GAME CONSTANTS----------
 LOW_HEALTH = 30
-HUNGER_POINT = 75
 MAX_HEALTH = 100
 HUNGER_MULTIPLIER = 3
 
@@ -24,13 +23,13 @@ BOARD_EDGE_INFLUENCE = 20
 FLEE_EDGES_MULT = 1.2
 CLOSE_FOOD_INFLUENCE = 13
 CHASE_TAIL_INFLUENCE = 13
-FLEE_ENEMIES_INFLUENCE = 8
-KILL_ENEMY_INFLUENCE = 14
+FLEE_ENEMIES_INFLUENCE = 18
+KILL_ENEMY_INFLUENCE = 18
 DEAD_END_DETERRENCE = 25
 
 CLOSE_FOOD_MAX_DIST = 6
 MAX_SEARCH_PATH_LEN = 8
-HEAD_SEARCH_MULT = 1.5
+HEAD_SEARCH_MULT = 2
 
 #A* Search constants
 HEURISTIC_WEIGHT = 2.5
@@ -453,7 +452,7 @@ def dead_end_filling(board):
 Function to check for enemy snakes 2 spaces away that could collide and cause death. Basically a further
     safety check 2 tiles in each direction. 'Move' parameter is the direct move that will be checked.
 
-    Returns True if a larger enemy snake head is adjacent, else returns False.
+    Returns True if a larger enemy snake head is adjacent/invalid space (avoid), else returns False (ignore).
 '''
 def incoming_enemy_snake(board, snake, move, enemies, influence):
 
@@ -529,7 +528,8 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
                     break
 
                 #if not a head collision, check for enemy body and reduce influence for that immediate move
-                for part in temp_enemy.get_body():
+                '''TRY REMOVING BODY CHECKING
+                    for part in temp_enemy.get_body():
 
                     if part == adjacent_check:
                         if move == 'up':
@@ -539,7 +539,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
                         elif move == 'left':
                             influence.inc_left(-FLEE_ENEMIES_INFLUENCE)
                         elif move == 'right':
-                            influence.inc_right(-FLEE_ENEMIES_INFLUENCE)
+                            influence.inc_right(-FLEE_ENEMIES_INFLUENCE)'''
 
         if enemy_found:
 
@@ -813,9 +813,8 @@ def move():
             closest_food = False
             closest_dist = None
 
-        #Search for food -- only if hunger has begun, is valid/close enough food, and is closest snake
-        if (my_snake.get_health() <= HUNGER_POINT and 
-            ((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
+        #Search for food -- only if is valid/close enough food, and is closest snake
+        if (((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
             (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)) and
             is_closest_snake(my_snake, closest_food, closest_dist, enemy_snakes)):
 
@@ -881,8 +880,7 @@ def move():
                         influence.inc_right(CHASE_TAIL_INFLUENCE)
 
     #----------MOVE DECISION-MAKING----------
-    #priority influence 1
-    #ADDED - drive snake away from edge, towards middle
+    #priority influence 1 - find valid next moves
     possible_moves = check_valid_moves(my_snake, my_snake.get_head(), board, enemy_snakes, influence)
 
     #priority influence 2 - remove invalid direction
@@ -894,7 +892,6 @@ def move():
 
     #check further for any larger, incoming snakes that would result in a death collision
     if len(possible_moves) > 1:
-        #possible_moves = [move for move in possible_moves if not incoming_enemy_snake(board, my_snake, move, enemy_snakes, influence)]
 
         for move in possible_moves:
             if incoming_enemy_snake(board, my_snake, move, enemy_snakes, influence) and len(possible_moves) > 1:
