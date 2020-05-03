@@ -32,7 +32,7 @@ pip install -r requirements.txt
 
 5) Run the local server:
 ```
-python app/main.py
+python run.py
 ```
 
 6) In a new CLI, test your snake by sending a curl to the running snake. [data.json](https://github.com/rbassot/serprintine/blob/snake-update/data.json) contains a sample JSON dataset based off the Battlesnake API. The curl below targets the /move endpoint.
