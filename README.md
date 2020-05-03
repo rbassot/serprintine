@@ -1,46 +1,43 @@
-Serprintine is a project based off the Python starter-snake found at https://play.battlesnake.com/. Documentation below is from the  official Battlesnake website.
+# Python Battlesnake - Serprintine*
+
+Serprintine is a project based off the Python starter-snake found at https://play.battlesnake.com/. The most developed snake (Serprintine*) lives on this branch (snake-update).
+
+Serprintine* is a search-driven Battlesnake AI in Python 3.7 that implements A* searching and dead-end filling algorithms. Food-finding and own-tail-chasing are prioritized in the arena. Valid moves are assessed and the most positively influenced move is selected.
+
+This snake uses [Bottle web framework](http://bottlepy.org/docs/dev/index.html) to manage HTTP requests and responses, and [gunicorn web server](http://gunicorn.org/) for running bottle [Heroku](https://heroku.com/deploy) as a cloud application.
+
+
+For API documentation, visit [https://github.com/battlesnakeio/community/blob/master/starter-snakes.md](https://github.com/battlesnakeio/community/blob/master/starter-snakes.md). Dependencies are listed in [requirements.txt](https://github.com/rbassot/serprintine/blob/snake-update/requirements.txt).
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 
+## Running Serprintine* Locally
 
-# starter-snake-python
+1) [Fork this repo](https://github.com/rbassot/serprintine/tree/snake-update/fork).
 
-A simple [Battlesnake AI](http://battlesnake.io) written in Python. 
-
-Visit [https://github.com/battlesnakeio/community/blob/master/starter-snakes.md](https://github.com/battlesnakeio/community/blob/master/starter-snakes.md) for API documentation and instructions for running your AI.
-
-This AI client uses the [bottle web framework](http://bottlepy.org/docs/dev/index.html) to serve requests and the [gunicorn web server](http://gunicorn.org/) for running bottle on Heroku. Dependencies are listed in [requirements.txt](requirements.txt).
-
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
-
-#### You will need...
-
-* a working Python 2.7 development environment ([getting started guide](http://hackercodex.com/guide/python-development-environment-on-mac-osx/))
-* experience [deploying Python apps to Heroku](https://devcenter.heroku.com/articles/getting-started-with-python#introduction)
-* [pip](https://pip.pypa.io/en/latest/installing.html) to install Python dependencies
-
-## Running the Snake Locally
-
-1) [Fork this repo](https://github.com/battlesnakeio/starter-snake-python/fork).
-
-2) Clone repo to your development environment:
+2) Clone this repo to your development environment:
 ```
-git clone git@github.com:<your github username>/starter-snake-python.git
+git clone git@github.com:<your github username>/serprintine.git
 ```
 
-3) Install dependencies using [pip](https://pip.pypa.io/en/latest/installing.html):
+3) Checkout this development branch:
+```
+git checkout snake-update
+```
+
+4) Install dependencies using [pip](https://pip.pypa.io/en/latest/installing.html):
 ```
 pip install -r requirements.txt
 ```
 
-4) Run local server:
+5) Run the local server:
 ```
 python app/main.py
 ```
 
-5) Test your snake by sending a curl to the running snake
+6) In a new CLI, test your snake by sending a curl to the running snake. [data.json](https://github.com/rbassot/serprintine/blob/snake-update/data.json) contains a sample JSON dataset based off the Battlesnake API. The curl below targets the /move endpoint.
 ```
-curl -XPOST -H 'Content-Type: application/json' -d '{ "hello": "world"}' http://localhost:8080/start
+curl -XPOST -H 'Content-Type:application/json' --data @data.json http://localhost:8080/move
 ```
 
 ## Deploying to Heroku
@@ -66,6 +63,6 @@ or visit [http://APP_NAME.herokuapp.com](http://APP_NAME.herokuapp.com).
 heroku logs --tail
 ```
 
-## Questions?
+## Acknowledgements
 
-Email [hello@battlesnake.com](mailto:hello@battlesnake.com), or tweet [@battlesnakeio](http://twitter.com/battlesnakeio).
+Thank you to the people behind Battlesnake to allow the use of a starter snake in Python that kickstarted this project. Parts of this README were taken from the Battlesnake Python starter-snake.

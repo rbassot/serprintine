@@ -206,21 +206,17 @@ def check_valid_moves(snake, position, board, enemies, influence):
     if 'horiz_board_edge' in temp_snake.states and 'vert_board_edge' not in temp_snake.states:
         if 'left_board_edge' in temp_snake.states:
             possible_moves = ['up', 'down', 'right']
-            #influence.inc_right(BOARD_EDGE_INFLUENCE)
 
         elif 'right_board_edge' in temp_snake.states:
             possible_moves = ['up', 'down', 'left']
-            #influence.inc_left(BOARD_EDGE_INFLUENCE)
 
     elif 'vert_board_edge' in temp_snake.states and 'horiz_board_edge' not in temp_snake.states:
 
         if 'top_board_edge' in temp_snake.states:
             possible_moves = ['down', 'left', 'right']
-            #influence.inc_down(BOARD_EDGE_INFLUENCE)
 
         elif 'bottom_board_edge' in temp_snake.states:
             possible_moves = ['up', 'left', 'right']
-            #influence.inc_up(BOARD_EDGE_INFLUENCE)
 
     elif 'horiz_board_edge' in temp_snake.states and 'vert_board_edge' in temp_snake.states:
 
@@ -363,8 +359,7 @@ def a_star_search(board, snake, enemies, start, target):
         #adjust board for every turn
         adjust_future_tails(temp_board, temp_snake, temp_enemies)
 
-        #get (valid) adjacent tile coordinates to create children nodes
-        #*** assumes board is square here ***
+        #get -valid- adjacent tile coordinates to create children nodes
         adjacent_tiles = current_node.get_adjacent_spaces()
         adjacent_tiles = [tile for tile in adjacent_tiles
                             if not ((tile[0] < 0 or tile[0] > bound) or (tile[1] < 0 or tile[1] > bound))]
@@ -403,7 +398,7 @@ def a_star_search(board, snake, enemies, start, target):
             child_node.h = HEURISTIC_WEIGHT * (math.sqrt(  (child_node.position[0] - target[0])**2 + (child_node.position[1] - target[1])**2  ))
             child_node.f = float(child_node.g + child_node.h)
 
-            #check if child is already in open set; skip if it's g-val is greater
+            #check if child is already in open set; skip if it's g-value is greater
             for open_node in open_set:
 
                 if child_node == open_node and child_node.g > open_node.g:
@@ -527,20 +522,6 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
                     enemy_found = True
                     break
 
-                #if not a head collision, check for enemy body and reduce influence for that immediate move
-                '''TRY REMOVING BODY CHECKING
-                    for part in temp_enemy.get_body():
-
-                    if part == adjacent_check:
-                        if move == 'up':
-                            influence.inc_up(-FLEE_ENEMIES_INFLUENCE)
-                        elif move == 'down':
-                            influence.inc_down(-FLEE_ENEMIES_INFLUENCE)
-                        elif move == 'left':
-                            influence.inc_left(-FLEE_ENEMIES_INFLUENCE)
-                        elif move == 'right':
-                            influence.inc_right(-FLEE_ENEMIES_INFLUENCE)'''
-
         if enemy_found:
 
             #compare snake lengths -- my snake is longer
@@ -558,7 +539,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
 
                 return False
 
-            #my snake is shorter
+            #my snake is equal or shorter
             else:
                 return True
 
@@ -619,7 +600,7 @@ def is_closest_snake(snake, target, dist, enemies):
         if enemy.get_distance_to(target) == None:
             continue
 
-        if enemy.get_distance_to(target) < snake_dist:
+        if enemy.get_distance_to(target) <= snake_dist:
             return False
 
     return True
@@ -671,7 +652,7 @@ def start():
 
 
 '''
---------------------MOVE REQUEST--------------------
+--------------------SAMPLE MOVE REQUEST--------------------
 {
   "game": {
     "id": "game-id-string"
@@ -739,48 +720,12 @@ def move():
         - Total the influence counts after every check and finally select a direction to move in.
         - A* Search finds desired paths; Dead end filling avoids entering paths where my snake would die.
     '''
+
     influence = classes.Influence()
 
     #perform dead end filling algorithm on board's grid attribute
-    #TESTING
-    for row in range(len(board.grid)):
-        for col in range(len(board.grid[row])):
-            x = col
-            y = row
-
-            if board.get_grid_space(x, y) == 'filled':
-                print('F ', end='')
-                continue
-
-            if board.get_grid_space(x, y) in ('empty', 'food'):
-                print('- ', end='')
-                continue
-
-            print('X ', end='')
-
-        print()
-
-    print()
-    print()
     dead_end_filling(board)
     
-    for row in range(len(board.grid)):
-        for col in range(len(board.grid[row])):
-            x = col
-            y = row
-
-            if board.get_grid_space(x, y) == 'filled':
-                print('F ', end='')
-                continue
-
-            if board.get_grid_space(x, y) in ('empty', 'food'):
-                print('- ', end='')
-                continue
-
-            print('X ', end='')
-
-        print()
-
     #get snake states before calculation
     get_states(my_snake, board, influence)
 
@@ -897,7 +842,7 @@ def move():
             if incoming_enemy_snake(board, my_snake, move, enemy_snakes, influence) and len(possible_moves) > 1:
                 possible_moves.remove(move)
     
-    #secondary influences
+    #total the influences and return the best move
     move_influences = []
     if 'up' in possible_moves:
         move_influences.append(influence.move_up)
