@@ -27,7 +27,7 @@ FLEE_ENEMIES_INFLUENCE = 18
 KILL_ENEMY_INFLUENCE = 18
 DEAD_END_DETERRENCE = 25
 
-CLOSE_FOOD_MAX_DIST = 6
+CLOSE_FOOD_MAX_DIST = 7
 MAX_SEARCH_PATH_LEN = 8
 HEAD_SEARCH_MULT = 2
 
@@ -412,9 +412,9 @@ def a_star_search(board, snake, enemies, start, target):
             open_set.append(child_node)
 
 
-    #if no more searchable tiles & no target found, return None
+    #if no more searchable tiles & no target found, return empty list
     print('No path found!')
-    return None
+    return []
 
 
 
@@ -484,7 +484,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
     #assure analysis tile is on the grid & is a valid open space
     tile_x, tile_y = tile_analyzed
     if ((tile_x < 0 or tile_x > temp_board.width - 1 or tile_y < 0 or tile_y > temp_board.width - 1)
-            or (temp_board.get_grid_space(tile_x, tile_y) != 'empty' and temp_board.get_grid_space(tile_x, tile_y) != 'food')):
+            or (temp_board.get_grid_space(tile_x, tile_y) not in ('empty', 'food')):
         return True
 
     #check adjacents to the analysis tile
@@ -765,8 +765,8 @@ def move():
 
             food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
 
-            if ((food_path and len(food_path) <= MAX_SEARCH_PATH_LEN) or
-                    (food_path and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
+            if ((len(food_path) > 0 and len(food_path) <= MAX_SEARCH_PATH_LEN) or
+                    (len(food_path) > 0 and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
 
                 if head_search:
                     head_search = False
@@ -797,7 +797,7 @@ def move():
         else:
             chase_tail = a_star_search(board, my_snake, enemy_snakes, search_tile, my_snake.get_tail())
 
-            if chase_tail:
+            if len(chase_tail > 0):
 
                 if head_search:
                     head_search = False
