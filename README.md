@@ -4,7 +4,7 @@ Serprintine is a project based off the Python starter-snake found at https://pla
 
 Serprintine* is a search-driven Battlesnake AI in Python 3.7 that implements A* searching and dead-end filling algorithms. Food-finding and own-tail-chasing are prioritized in the arena. Valid moves are assessed and the most positively influenced move is selected.
 
-This snake uses [Bottle web framework](http://bottlepy.org/docs/dev/index.html) to manage HTTP requests and responses, and [gunicorn web server](http://gunicorn.org/) for running bottle [Heroku](https://heroku.com/deploy) as a cloud application.
+This snake uses [Bottle web framework](http://bottlepy.org/docs/dev/index.html) to manage HTTP requests and responses, and [gunicorn web server](http://gunicorn.org/) for running bottle on [Heroku](https://heroku.com/deploy) as a cloud application.
 
 
 For API documentation, visit [https://github.com/battlesnakeio/community/blob/master/starter-snakes.md](https://github.com/battlesnakeio/community/blob/master/starter-snakes.md). Dependencies are listed in [requirements.txt](https://github.com/rbassot/serprintine/blob/snake-update/requirements.txt).
@@ -13,7 +13,7 @@ For API documentation, visit [https://github.com/battlesnakeio/community/blob/ma
 
 ## Running Serprintine* Locally
 
-1) [Fork this repo](https://github.com/rbassot/serprintine/tree/snake-update/fork).
+1) [Fork this repo](https://github.com/rbassot/serprintine/fork).
 
 2) Clone this repo to your development environment:
 ```
