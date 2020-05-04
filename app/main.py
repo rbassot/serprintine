@@ -484,7 +484,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
     #assure analysis tile is on the grid & is a valid open space
     tile_x, tile_y = tile_analyzed
     if ((tile_x < 0 or tile_x > temp_board.width - 1 or tile_y < 0 or tile_y > temp_board.width - 1)
-            or (temp_board.get_grid_space(tile_x, tile_y) not in ('empty', 'food')):
+            or (temp_board.get_grid_space(tile_x, tile_y) not in ('empty', 'food'))):
         return True
 
     #check adjacents to the analysis tile
