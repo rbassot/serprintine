@@ -1,4 +1,4 @@
-#modified to run: Python 3.7.6
+#modified to run: Python 3.7.7
 
 import json
 import sys
@@ -115,7 +115,6 @@ def find_food(snake, board):
     if len(board.food) <= 0:
         return False
 
-    head_x, head_y = snake.get_head()
     closest_food = tuple(board.food[0])
     closest_dist = float(math.sqrt(board.width**2 + board.height**2))
 
