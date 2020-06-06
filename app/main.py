@@ -622,85 +622,90 @@ def static(path):
     return bottle.static_file(path, root='static/')
 
 
-@bottle.post('/ping')
+@bottle.post('/')
 def ping():
     """
-    A keep-alive endpoint used to prevent cloud application platforms,
-    such as Heroku, from sleeping the application instance.
+    For Battlesnake API v1.
+    Retrieves display information about the snake.
     """
-    return ping_response()
+    return {
+    "apiversion": "1",
+    "author": "rbassot",
+    "color": "#00b3b3",
+    "head": "tongue",
+    "tail": "curled"
+}
 
 
 @bottle.post('/start')
 def start():
     data = bottle.request.json
-
-    """
-    TODO: If you intend to have a stateful snake AI,
-            initialize your snake state here using the
-            request's data if necessary.
-    """
     #print(json.dumps(data))
 
-    return {
-        "color": "#00b3b3",
-        "headType": "tongue",
-        "tailType": "curled",
-    }
+    return
 
 
 
 '''
---------------------SAMPLE MOVE REQUEST--------------------
+-------------------- SAMPLE MOVE REQUEST (Battlesnake API v1) --------------------
+POST https://your.battlesnake.server.com/move
 {
   "game": {
-    "id": "game-id-string"
+    "id": "game-00fe20da-94ad-11ea-bb37",
+    "timeout": 500
   },
-
-  "turn": 4,
-
+  "turn": 14,
   "board": {
-    "height": 15,
-    "width": 15,
+    "height": 11,
+    "width": 11,
     "food": [
-      {
-        "x": 1,
-        "y": 3
-      }
+      {"x": 5, "y": 5}, 
+      {"x": 9, "y": 0}, 
+      {"x": 2, "y": 6}
     ],
-
     "snakes": [
       {
-        "id": "snake-id-string",
-        "name": "Sneky Snek",
-        "health": 90,
+        "id": "snake-508e96ac-94ad-11ea-bb37",
+        "name": "My Snake",
+        "health": 54,
         "body": [
-          {
-            "x": 1,
-            "y": 3
-          }
-        ]
+          {"x": 0, "y": 0}, 
+          {"x": 1, "y": 0}, 
+          {"x": 2, "y": 0}
+        ],
+        "head": {"x": 0, "y": 0},
+        "length": 3,
+        "shout": "why are we shouting??"
+      }, 
+      {
+        "id": "snake-b67f4906-94ae-11ea-bb37",
+        "name": "Another Snake",
+        "health": 16,
+        "body": [
+          {"x": 5, "y": 4}, 
+          {"x": 5, "y": 3}, 
+          {"x": 6, "y": 3},
+          {"x": 6, "y": 2}
+        ],
+        "head": {"x": 5, "y": 4},
+        "length": 4,
+        "shout": "I'm not really sure..."
       }
     ]
   },
-
   "you": {
-    "id": "snake-id-string",
-    "name": "Sneky Snek",
-    "health": 90,
+    "id": "snake-508e96ac-94ad-11ea-bb37",
+    "name": "My Snake",
+    "health": 54,
     "body": [
-      {
-        "x": 1,
-        "y": 3
-      }
-    ]
+      {"x": 0, "y": 0}, 
+      {"x": 1, "y": 0}, 
+      {"x": 2, "y": 0}
+    ],
+    "head": {"x": 0, "y": 0},
+    "length": 3,
+    "shout": "why are we shouting??"
   }
-}
-
---------------------MOVE RESPONSE--------------------
-{
-  "move": "right",
-  "shout": "It's snack time!"
 }
 '''
 
@@ -796,7 +801,7 @@ def move():
         else:
             chase_tail = a_star_search(board, my_snake, enemy_snakes, search_tile, my_snake.get_tail())
 
-            if len(chase_tail > 0):
+            if chase_tail and len(chase_tail) > 0:
 
                 if head_search:
                     head_search = False
