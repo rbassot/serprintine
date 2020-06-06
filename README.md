@@ -7,7 +7,7 @@ Serprintine* is a search-driven Battlesnake AI in Python 3.7 that implements A* 
 This snake uses [Bottle web framework](http://bottlepy.org/docs/dev/index.html) to manage HTTP requests and responses, and [gunicorn web server](http://gunicorn.org/) for running bottle on [Heroku](https://heroku.com/deploy) as a cloud application.
 
 
-For API documentation, visit [https://github.com/battlesnakeio/community/blob/master/starter-snakes.md](https://github.com/battlesnakeio/community/blob/master/starter-snakes.md). Dependencies are listed in [requirements.txt](https://github.com/rbassot/serprintine/blob/snake-update/requirements.txt).
+For Battlesnake API v1 reference, visit [https://docs.battlesnake.com/references/api](https://docs.battlesnake.com/references/api). Dependencies are listed in [requirements.txt](https://github.com/rbassot/serprintine/blob/snake-update/requirements.txt).
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ git clone git@github.com:<your github username>/serprintine.git
 git checkout snake-update
 ```
 
-4) Assure a version of Python 3 is installed (I used Python 3.7.6 for this project). Install dependencies using [pip](https://pip.pypa.io/en/latest/installing.html):
+4) Assure a version of Python 3 is installed (I used Python 3.7.7 for this project). Install dependencies using [pip](https://pip.pypa.io/en/latest/installing.html):
 ```
 pip install -r requirements.txt
 ```
@@ -35,9 +35,9 @@ pip install -r requirements.txt
 python run.py
 ```
 
-6) In a new CLI, test your snake by sending a curl to the running snake. [data.json](https://github.com/rbassot/serprintine/blob/snake-update/data.json) contains a sample JSON dataset based off the Battlesnake API. The curl below targets the /move endpoint.
+6) In a new CLI, test your snake by sending a curl to the running snake. [data-api-v1.json](https://github.com/rbassot/serprintine/blob/snake-update/data-api-v1.json) contains a sample JSON dataset based off the Battlesnake API v1. The curl below targets the /move endpoint.
 ```
-curl -XPOST -H 'Content-Type:application/json' --data @data.json http://localhost:8080/move
+curl -XPOST -H 'Content-Type:application/json' --data @data-api-v1.json http://localhost:8080/move
 ```
 
 ## Deploying to Heroku
