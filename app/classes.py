@@ -27,7 +27,7 @@ class Board(object):
             Returns the list containing all food coordinates on the board.
 
         get_grid_space(self, x, y):
-            Returns the value (string) occupying the tile at the x & y coordinates of the grid.
+            Returns the object type (string) occupying the tile at the x & y coordinates of the grid.
 
         get_grid(self):
             Returns the grid (2D list) describing the locations
@@ -185,7 +185,7 @@ class Snake(object):
             Does not worry about direction or order of moves. Target object is a set of x & y coordinates.
 
         dir_towards(self, target):
-            Returns the lone valid direction (strings) that approaches the passed target. Used for 
+            Returns the unique valid direction (string) required to approach the passed target. Used for 
             A*, where an adjacent tile on the shortest path is passed to this function.
             Target object is a set of x & y coordinates.
 
@@ -228,17 +228,17 @@ class Snake(object):
 
     def get_invalid_dir(self):
         try:
-            x, y = self.body[0]
+            x, y = self.get_head()
             body_x, body_y = self.body[1]
 
         except IndexError:
             return None
 
         if x == body_x and y < body_y:
-            return "down"
+            return "up"
         
         elif x == body_x and y > body_y:
-            return "up"
+            return "down"
 
         elif y == body_y and x > body_x:
             return "left"
@@ -256,9 +256,9 @@ class Snake(object):
     def dir_towards(self, target):
         target_x, target_y = target
         x, y = self.get_head()
-        if y > target_y:
-            return "up"
         if y < target_y:
+            return "up"
+        if y > target_y:
             return "down"
         if x > target_x:
             return "left"
@@ -270,9 +270,9 @@ class Snake(object):
         target_x, target_y = target
         x, y = self.get_head()
         directions = []
-        if y > target_y:
-            directions.append("up")
         if y < target_y:
+            directions.append("up")
+        if y > target_y:
             directions.append("down")
         if x > target_x:
             directions.append("left")
@@ -292,9 +292,9 @@ class Influence(object):
 
     ----------
     ATTRIBUTES:
-        move_up - total summation (float) of influences towards moving up (-y)
+        move_up - total summation (float) of influences towards moving up (+y)
 
-        move_down - total summation (float) of influences towards moving down (+y)
+        move_down - total summation (float) of influences towards moving down (-y)
 
         move_left - total summation (float) of influences towards moving left (-x)
 
@@ -382,7 +382,7 @@ class SearchNode():
 
     def get_adjacent_spaces(self):
         x, y = self.position
-        return [(x, y - 1), (x, y + 1), (x - 1, y), (x + 1, y)]
+        return [(x, y + 1), (x, y - 1), (x - 1, y), (x + 1, y)]
 
     def get_parent(self):
         return self.parent

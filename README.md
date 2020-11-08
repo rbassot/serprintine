@@ -25,7 +25,7 @@ git clone git@github.com:<your github username>/serprintine.git
 git checkout snake-update
 ```
 
-4) Assure a version of Python 3 is installed (I used Python 3.7.7 for this project). Install dependencies using [pip](https://pip.pypa.io/en/latest/installing.html):
+4) Assure a version of Python 3 is installed (I used Python 3.8.5 for this project). Install dependencies (including the Bottle web framework) using [pip](https://pip.pypa.io/en/latest/installing.html):
 ```
 pip install -r requirements.txt
 ```

@@ -95,6 +95,7 @@ def initialize(request):
             row = y
             col = x
             grid[row][col] = 'enemysnake'
+            #TODO: add 'enemysnakehead' recognition
 
         enemy_snake = classes.Snake(enemy_body, enemy_health)
         enemy_snakes.append(enemy_snake)
@@ -107,8 +108,8 @@ def initialize(request):
 
 
 '''
-Function to calculate the coordinates of the closest -available- food source to the snake's
-    head, using Pythagorus. Returns a tuple of the x & y coordinates.
+Function to calculate the coordinates of the closest -accessible- food source to the snake's
+    head, using Pythagorus. Returns a tuple of the x & y coordinates of the closest food source.
 '''
 def find_food(snake, board):
 
@@ -167,12 +168,12 @@ def get_states(snake, board, influence):
         snake.add_state('vert_board_edge')
 
         if head_y == 0:
-            influence.inc_down(BOARD_EDGE_INFLUENCE * FLEE_EDGES_MULT)
-            snake.add_state('top_board_edge')
-
-        else:
             influence.inc_up(BOARD_EDGE_INFLUENCE * FLEE_EDGES_MULT)
             snake.add_state('bottom_board_edge')
+
+        else:
+            influence.inc_down(BOARD_EDGE_INFLUENCE * FLEE_EDGES_MULT)
+            snake.add_state('top_board_edge')
 
     return
 
@@ -221,16 +222,16 @@ def check_valid_moves(snake, position, board, enemies, influence):
 
         #top left corner
         if head_x == 0 and head_y == 0:
-            possible_moves = ['down', 'right']
+            possible_moves = ['up', 'right']
         #top right corner
         elif head_x == temp_board.width - 1 and head_y == 0:
-            possible_moves = ['down', 'left']
+            possible_moves = ['up', 'left']
         #bottom left corner
         elif head_x == 0 and head_y == temp_board.height - 1:
-            possible_moves = ['up', 'right']
+            possible_moves = ['down', 'right']
         #bottom right corner
         elif head_x == temp_board.width - 1 and head_y == temp_board.height - 1:
-            possible_moves = ['up', 'left']
+            possible_moves = ['down', 'left']
 
     else:
         possible_moves = ['up', 'down', 'left', 'right']
@@ -246,13 +247,13 @@ def check_valid_moves(snake, position, board, enemies, influence):
 
         spacetaker = ''
         if possible_moves[i] == 'up':
-            spacetaker = temp_board.get_grid_space(tile_x, tile_y - 1)
+            spacetaker = temp_board.get_grid_space(tile_x, tile_y + 1)
             
             if spacetaker == 'filled':
                 influence.inc_up(-DEAD_END_DETERRENCE)
 
         elif possible_moves[i] == 'down':
-            spacetaker = temp_board.get_grid_space(tile_x, tile_y + 1)
+            spacetaker = temp_board.get_grid_space(tile_x, tile_y - 1)
             
             if spacetaker == 'filled':
                 influence.inc_down(-DEAD_END_DETERRENCE)
@@ -270,7 +271,7 @@ def check_valid_moves(snake, position, board, enemies, influence):
                 influence.inc_right(-DEAD_END_DETERRENCE)
 
         #not a valid tile
-        if spacetaker in ('mysnake', 'enemysnake'):
+        if spacetaker in ('mysnake', 'mysnakehead', 'enemysnake'):
             possible_moves.pop(i)
             i -= 1
 
@@ -325,13 +326,12 @@ def a_star_search(board, snake, enemies, start, target):
     end_node = classes.SearchNode(None, target)
     open_set.append(start_node)
 
+    #---Continuous search loop---
     #search until open set of nodes is empty
     while open_set:
 
         #find current node = node with lowest f value
         current_node = open_set[0]
-        current_index = 0
-
         for i, open_node in enumerate(open_set):
 
             if open_node.f <= current_node.f:
@@ -463,11 +463,11 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
     x, y = temp_snake.get_head()
     if move == 'up':
         no_check = 'down'
-        tile_analyzed = (x, y - 1)
+        tile_analyzed = (x, y + 1)
 
     elif move == 'down':
         no_check = 'up'
-        tile_analyzed = (x, y + 1)
+        tile_analyzed = (x, y - 1)
 
     elif move == 'left':
         no_check = 'right'
@@ -500,11 +500,11 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
 
         #check for which adjacency
         if adjacent == 'up':
-            spacetaker = temp_board.get_grid_space(tile_x, tile_y - 1)
-            adjacent_check = (tile_x, tile_y - 1)
-        elif adjacent == 'down':
             spacetaker = temp_board.get_grid_space(tile_x, tile_y + 1)
             adjacent_check = (tile_x, tile_y + 1)
+        elif adjacent == 'down':
+            spacetaker = temp_board.get_grid_space(tile_x, tile_y - 1)
+            adjacent_check = (tile_x, tile_y - 1)
         elif adjacent == 'left':
             spacetaker = temp_board.get_grid_space(tile_x - 1, tile_y)
             adjacent_check = (tile_x - 1, tile_y)
@@ -622,28 +622,19 @@ def static(path):
     return bottle.static_file(path, root='static/')
 
 
-@bottle.post('/')
-def ping():
-    """
-    For Battlesnake API v1.
-    Retrieves display information about the snake.
-    """
+"""
+For Battlesnake API Version 1 (2020).
+Retrieves display information about the snake.
+"""
+@bottle.get('/')
+def get():
     return {
-    "apiversion": "1",
-    "author": "rbassot",
-    "color": "#00b3b3",
-    "head": "tongue",
-    "tail": "curled"
-}
-
-
-@bottle.post('/start')
-def start():
-    data = bottle.request.json
-    #print(json.dumps(data))
-
-    return
-
+        "apiversion": "1",
+        "author": "rbassot",
+        "color": "#00b3b3",
+        "head": "tongue",
+        "tail": "curled"
+    }
 
 
 '''
@@ -741,8 +732,8 @@ def move():
     #Search performed from the head is weighted the most with a multiplier.
     head_x, head_y = my_snake.get_head()
 
-    #setup search tiles
-    search_tiles = [(head_x, head_y), (head_x, head_y - 1), (head_x, head_y + 1), (head_x - 1, head_y), (head_x + 1, head_y)]
+    #setup search tiles to perform A* from adjacent locations
+    search_tiles = [(head_x, head_y), (head_x, head_y + 1), (head_x, head_y - 1), (head_x - 1, head_y), (head_x + 1, head_y)]
     if invalid_dir == 'up':
         search_tiles.pop(1)
     elif invalid_dir == 'down':
@@ -768,34 +759,35 @@ def move():
             is_closest_snake(my_snake, closest_food, closest_dist, enemy_snakes)):
 
             food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
+            if food_path:
 
-            if ((len(food_path) > 0 and len(food_path) <= MAX_SEARCH_PATH_LEN) or
-                    (len(food_path) > 0 and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
+                if ((len(food_path) > 0 and len(food_path) <= MAX_SEARCH_PATH_LEN) or
+                        (len(food_path) > 0 and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
 
-                if head_search:
-                    head_search = False
-                    search_move = my_snake.dir_towards(food_path[0])
+                    if head_search:
+                        head_search = False
+                        search_move = my_snake.dir_towards(food_path[0])
 
-                    if search_move == 'up':
-                        influence.inc_up(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
-                    elif search_move == 'down':
-                        influence.inc_down(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
-                    elif search_move == 'left':
-                        influence.inc_left(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
-                    elif search_move == 'right':
-                        influence.inc_right(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
+                        if search_move == 'up':
+                            influence.inc_up(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
+                        elif search_move == 'down':
+                            influence.inc_down(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
+                        elif search_move == 'left':
+                            influence.inc_left(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
+                        elif search_move == 'right':
+                            influence.inc_right(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT)
 
-                else:
-                    search_moves = my_snake.dirs_towards(food_path[0])
+                    else:
+                        search_moves = my_snake.dirs_towards(food_path[0])
 
-                    if 'up' in search_moves:
-                        influence.inc_up(CLOSE_FOOD_INFLUENCE)
-                    if 'down' in search_moves:
-                        influence.inc_down(CLOSE_FOOD_INFLUENCE)
-                    if 'left' in search_moves:
-                        influence.inc_left(CLOSE_FOOD_INFLUENCE)
-                    if 'right' in search_moves:
-                        influence.inc_right(CLOSE_FOOD_INFLUENCE)
+                        if 'up' in search_moves:
+                            influence.inc_up(CLOSE_FOOD_INFLUENCE)
+                        if 'down' in search_moves:
+                            influence.inc_down(CLOSE_FOOD_INFLUENCE)
+                        if 'left' in search_moves:
+                            influence.inc_left(CLOSE_FOOD_INFLUENCE)
+                        if 'right' in search_moves:
+                            influence.inc_right(CLOSE_FOOD_INFLUENCE)
 
         #otherwise, search for own tail
         else:
