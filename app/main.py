@@ -764,7 +764,11 @@ def move():
             (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_DIST_MULTIPLIER))):
             # and is_closest_snake(my_snake, closest_food, closest_dist, enemy_snakes))
 
-            food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
+            try:
+                food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
+            except TypeError:
+                pass
+            
             if food_path:
 
                 #1 -> Hungry (low health) food find case
@@ -827,7 +831,12 @@ def move():
 
         #Otherwise, search for own tail
         else:
-            chase_tail = a_star_search(board, my_snake, enemy_snakes, search_tile, my_snake.get_tail())
+            chase_tail = False
+            
+            try:
+                chase_tail = a_star_search(board, my_snake, enemy_snakes, search_tile, my_snake.get_tail())
+            except TypeError:
+                pass
 
             if chase_tail and len(chase_tail) > 0:
 
@@ -855,6 +864,7 @@ def move():
                         influence.inc_left(CHASE_TAIL_INFLUENCE)
                     if 'right' in search_moves:
                         influence.inc_right(CHASE_TAIL_INFLUENCE)
+
 
     #----------MOVE DECISION-MAKING----------
     #priority influence 1 - find valid next moves
