@@ -15,7 +15,7 @@ from .api import ping_response, start_response, move_response, end_response
 
 
 #----------GAME CONSTANTS----------
-LOW_HEALTH = 40
+LOW_HEALTH = 25
 MAX_HEALTH = 100
 HUNGER_DIST_MULTIPLIER = 3
 HUNGER_INFLUENCE_MULT = 3
@@ -820,7 +820,7 @@ def move():
                             influence.inc_right(CLOSE_FOOD_INFLUENCE)
             
 
-        #otherwise, search for own tail
+        #Otherwise, search for own tail
         else:
             chase_tail = a_star_search(board, my_snake, enemy_snakes, search_tile, my_snake.get_tail())
 
