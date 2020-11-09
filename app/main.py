@@ -15,9 +15,10 @@ from .api import ping_response, start_response, move_response, end_response
 
 
 #----------GAME CONSTANTS----------
-LOW_HEALTH = 30
+LOW_HEALTH = 40
 MAX_HEALTH = 100
-HUNGER_MULTIPLIER = 3
+HUNGER_DIST_MULTIPLIER = 3
+HUNGER_INFLUENCE_MULT = 3
 
 BOARD_EDGE_INFLUENCE = 20
 FLEE_EDGES_MULT = 1.2
@@ -755,14 +756,43 @@ def move():
 
         #Search for food -- only if is valid/close enough food, and is closest snake
         if (((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
-            (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_MULTIPLIER)) and
+            (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_DIST_MULTIPLIER)) and
             is_closest_snake(my_snake, closest_food, closest_dist, enemy_snakes)):
 
             food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
             if food_path:
 
-                if ((len(food_path) > 0 and len(food_path) <= MAX_SEARCH_PATH_LEN) or
-                        (len(food_path) > 0 and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
+                #1 -> Hungry (low health) food find case
+                if (len(food_path) > 0 and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
+                    
+                    if head_search:
+                        head_search = False
+                        search_move = my_snake.dir_towards(food_path[0])
+
+                        if search_move == 'up':
+                            influence.inc_up(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT * HUNGER_INFLUENCE_MULT)
+                        elif search_move == 'down':
+                            influence.inc_down(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT * HUNGER_INFLUENCE_MULT)
+                        elif search_move == 'left':
+                            influence.inc_left(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT * HUNGER_INFLUENCE_MULT)
+                        elif search_move == 'right':
+                            influence.inc_right(CLOSE_FOOD_INFLUENCE * HEAD_SEARCH_MULT * HUNGER_INFLUENCE_MULT)
+
+                    else:
+                        search_moves = my_snake.dirs_towards(food_path[0])
+
+                        if 'up' in search_moves:
+                            influence.inc_up(CLOSE_FOOD_INFLUENCE * HUNGER_INFLUENCE_MULT)
+                        if 'down' in search_moves:
+                            influence.inc_down(CLOSE_FOOD_INFLUENCE * HUNGER_INFLUENCE_MULT)
+                        if 'left' in search_moves:
+                            influence.inc_left(CLOSE_FOOD_INFLUENCE * HUNGER_INFLUENCE_MULT)
+                        if 'right' in search_moves:
+                            influence.inc_right(CLOSE_FOOD_INFLUENCE * HUNGER_INFLUENCE_MULT)
+                            
+
+                #2 -> Regular food find case
+                if ((len(food_path) > 0 and len(food_path) <= MAX_SEARCH_PATH_LEN):
 
                     if head_search:
                         head_search = False
@@ -788,6 +818,7 @@ def move():
                             influence.inc_left(CLOSE_FOOD_INFLUENCE)
                         if 'right' in search_moves:
                             influence.inc_right(CLOSE_FOOD_INFLUENCE)
+            
 
         #otherwise, search for own tail
         else:
