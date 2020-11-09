@@ -750,7 +750,7 @@ def move():
     for search_tile in search_tiles:
 
         search_moves = []
-        closest_food = False
+        closest_food = None
         closest_dist = None
 
         if my_snake.get_health() <= START_FOOD_SEARCHING:
@@ -764,6 +764,7 @@ def move():
             (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_DIST_MULTIPLIER))):
             # and is_closest_snake(my_snake, closest_food, closest_dist, enemy_snakes))
 
+            food_path = None
             try:
                 food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
             except TypeError:
@@ -831,7 +832,7 @@ def move():
 
         #Otherwise, search for own tail
         else:
-            chase_tail = False
+            chase_tail = None
             
             try:
                 chase_tail = a_star_search(board, my_snake, enemy_snakes, search_tile, my_snake.get_tail())
