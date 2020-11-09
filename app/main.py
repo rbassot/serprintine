@@ -26,8 +26,8 @@ FLEE_EDGES_MULT = 1.2
 CLOSE_FOOD_INFLUENCE = 13
 CHASE_TAIL_INFLUENCE = 13
 FLEE_ENEMIES_INFLUENCE = 18
-KILL_ENEMY_INFLUENCE = 18
-DEAD_END_DETERRENCE = 25
+KILL_ENEMY_INFLUENCE = 20
+DEAD_END_DETERRENCE = 35
 
 CLOSE_FOOD_MAX_DIST = 7
 MAX_SEARCH_PATH_LEN = 8
@@ -515,18 +515,19 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
             adjacent_check = (tile_x + 1, tile_y)
 
         if spacetaker == 'enemysnake':
-                
+            
             #find the adjacent snake and check its length
             for temp_enemy in temp_enemies:
                         
                 if temp_enemy.get_head() == adjacent_check:
+                    current_enemy = temp_enemy
                     enemy_found = True
                     break
 
         if enemy_found:
 
             #compare snake lengths -- my snake is longer
-            if snake.get_length() > enemy.get_length(): 
+            if snake.get_length() > current_enemy.get_length(): 
 
                 #motivate the snake to move into the direction parameter to make a kill -- return False
                 if move == 'up':
@@ -540,7 +541,7 @@ def incoming_enemy_snake(board, snake, move, enemies, influence):
 
                 return False
 
-            #my snake is equal or shorter
+            #my snake is equal or shorter -- move() handles this case by removing this move entirely
             else:
                 return True
 
