@@ -792,7 +792,7 @@ def move():
 
 
                 #2 -> Regular food find case
-                elif ((len(food_path) > 0 and len(food_path) <= MAX_SEARCH_PATH_LEN):
+                elif (len(food_path) > 0 and len(food_path) <= MAX_SEARCH_PATH_LEN):
 
                     if head_search:
                         head_search = False
