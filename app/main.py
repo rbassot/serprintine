@@ -754,16 +754,16 @@ def move():
             closest_food = False
             closest_dist = None
 
-        #Search for food -- only if is valid/close enough food, and is closest snake
+        #Search for food -- only if is valid/close enough food, and is closest snake (currently removed)
         if (((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
-            (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_DIST_MULTIPLIER)) and
-            is_closest_snake(my_snake, closest_food, closest_dist, enemy_snakes)):
+            (closest_food and my_snake.get_health() <= LOW_HEALTH and closest_dist <= CLOSE_FOOD_MAX_DIST * HUNGER_DIST_MULTIPLIER))):
+            # and is_closest_snake(my_snake, closest_food, closest_dist, enemy_snakes))
 
             food_path = a_star_search(board, my_snake, enemy_snakes, search_tile, closest_food)
             if food_path:
 
                 #1 -> Hungry (low health) food find case
-                if (len(food_path) > 0 and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER):
+                if (len(food_path) > 0 and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_DIST_MULTIPLIER):
                     
                     if head_search:
                         head_search = False

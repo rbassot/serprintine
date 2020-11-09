@@ -43,7 +43,7 @@
   "you": {
     "id": "snake-508e96ac-94ad-11ea-bb37",
     "name": "My Snake",
-    "health": 54,
+    "health": 39,
     "body": [
       {"x": 0, "y": 10}, 
       {"x": 1, "y": 10}, 
