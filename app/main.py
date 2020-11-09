@@ -17,7 +17,7 @@ from .api import ping_response, start_response, move_response, end_response
 #----------GAME CONSTANTS----------
 LOW_HEALTH = 25
 MAX_HEALTH = 100
-START_FOOD_SEARCHING = 70
+START_FOOD_SEARCHING = 80
 HUNGER_DIST_MULTIPLIER = 3
 HUNGER_INFLUENCE_MULT = 3
 
