@@ -1,6 +1,6 @@
-curl -XPOST -H 'Content-Type:application/json' --data @data.json http://localhost:8080/move
+curl -XPOST -H 'Content-Type:application/json' --data @data-api-v1.json http://localhost:8080/move
 
 Deploying to server:
 
-(Git) git push origin snake-update
+(GitHub) git push origin snake-update
 (Heroku) git push heroku snake-update:master

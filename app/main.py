@@ -17,6 +17,7 @@ from .api import ping_response, start_response, move_response, end_response
 #----------GAME CONSTANTS----------
 LOW_HEALTH = 25
 MAX_HEALTH = 100
+START_FOOD_SEARCHING = 70
 HUNGER_DIST_MULTIPLIER = 3
 HUNGER_INFLUENCE_MULT = 3
 
@@ -288,7 +289,7 @@ Function to perform an A* search towards a desired target (own tail, closest foo
     the start position. Moves take into account if snake tails will have moved away by the time
     that space is reached.
 
-    *Dead-end filling -- A* search will treat filled tiles as intraversable.
+    NOTE: For Dead-end filling -- A* search will treat filled tiles as intraversable.
 
 Algorithm:
     F = Total cost of the node; F = G + H
@@ -748,11 +749,12 @@ def move():
     for search_tile in search_tiles:
 
         search_moves = []
-        try:
-            closest_food, closest_dist = find_food(my_snake, board)
-        except TypeError:
-            closest_food = False
-            closest_dist = None
+        if my_snake.get_health() <= START_FOOD_SEARCHING:
+            try:
+                closest_food, closest_dist = find_food(my_snake, board)
+            except TypeError:
+                closest_food = False
+                closest_dist = None
 
         #Search for food -- only if is valid/close enough food, and is closest snake (currently removed)
         if (((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
