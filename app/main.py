@@ -749,12 +749,14 @@ def move():
     for search_tile in search_tiles:
 
         search_moves = []
+        closest_food = False
+        closest_dist = None
+
         if my_snake.get_health() <= START_FOOD_SEARCHING:
             try:
                 closest_food, closest_dist = find_food(my_snake, board)
             except TypeError:
-                closest_food = False
-                closest_dist = None
+                pass
 
         #Search for food -- only if is valid/close enough food, and is closest snake (currently removed)
         if (((closest_food and closest_dist <= CLOSE_FOOD_MAX_DIST) or
