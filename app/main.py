@@ -340,7 +340,7 @@ def a_star_search(board, snake, enemies, start, target):
                 current_node = open_node
                 current_index = i
 
-        closed_set.append(open_set.pop(current_index)
+        closed_set.append(open_set.pop(current_index))
 
         #check if search target was found - end of search
         if current_node == end_node:
