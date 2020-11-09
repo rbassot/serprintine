@@ -789,10 +789,10 @@ def move():
                             influence.inc_left(CLOSE_FOOD_INFLUENCE * HUNGER_INFLUENCE_MULT)
                         if 'right' in search_moves:
                             influence.inc_right(CLOSE_FOOD_INFLUENCE * HUNGER_INFLUENCE_MULT)
-                            
+
 
                 #2 -> Regular food find case
-                if ((len(food_path) > 0 and len(food_path) <= MAX_SEARCH_PATH_LEN):
+                elif ((len(food_path) > 0 and len(food_path) <= MAX_SEARCH_PATH_LEN):
 
                     if head_search:
                         head_search = False
