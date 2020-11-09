@@ -763,7 +763,7 @@ def move():
             if food_path:
 
                 #1 -> Hungry (low health) food find case
-                if (len(food_path) > 0 and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER)):
+                if (len(food_path) > 0 and my_snake.get_health() <= LOW_HEALTH and len(food_path) <= MAX_SEARCH_PATH_LEN * HUNGER_MULTIPLIER):
                     
                     if head_search:
                         head_search = False
